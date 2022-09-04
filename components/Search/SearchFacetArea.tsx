@@ -47,7 +47,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
     facetList = facetList.map(facet => {
       return {
         ...facet,
-        group: facetIdName
+        group: facetIdName,
       }
     })
 
@@ -180,9 +180,9 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
                     className={`invisible ${style.searchFacetCheckbox}`}
                     id={`facet_${facet.val}`}
                     value={facet.val}
-                    checked={(currentSelectedFacets.length > 0) ? currentSelectedFacets.some(selectedFacet => selectedFacet == facet) : false}
+                    checked={(currentSelectedFacets.length > 0) ? currentSelectedFacets.some(selectedFacet => selectedFacet.val == facet.val) : false}
                     onChange={(event) => {
-                      let newCurrentSelectedFacets = currentSelectedFacets.filter(selectedFacet => selectedFacet != facet)
+                      let newCurrentSelectedFacets = currentSelectedFacets.filter(selectedFacet => selectedFacet.val != facet.val)
 
                       if(event.target.checked) {
                         newCurrentSelectedFacets.push(facet)
