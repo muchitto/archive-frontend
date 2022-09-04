@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { MouseEventHandler, useState } from "react"
 import { Facet, FacetSearchResult, FacetTypeList, SelectedFacets } from "../../utils/Archive"
 import style from "./Search.module.scss"
@@ -54,11 +55,11 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
     setIsOpen(true)
   }
 
-  const currentFilteredList = () => {
+  const currentFilteredList = useMemo(() => {
     let newFacetList = facetList.filter(filterFacet)
     newFacetList = newFacetList.slice(facetsPerPage * (page - 1), facetsPerPage * page)
     return newFacetList
-  }
+  }, [facetList, search])
 
   const closeArea : MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault()
@@ -94,7 +95,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
                 await selectFacetGroup(facetGroupName, facetGroupIdName)
                 setIsOpen(true)
               }}>
-                <label className="">
+                <label className="cursor-pointer">
                   {facetGroupName}
                 </label>
                 {selectedFacets[facetGroupIdName] && selectedFacets[facetGroupIdName].length > 0 && (
@@ -110,44 +111,45 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
           )
         })}
       </div>
-      {facetList?.length > 0 && isOpen && (
+      {isOpen && (
         <div className="p-5 bg-white border-2 border-black mt-5">
           <div className="justify-between flex">
-            <div className="flex">
-              <img src="./icons/search.svg" className="inline-block md:w-10" />
+            {currentFilteredList.length > 0 && (
+              <div className="flex">
+                <img src="./icons/search.svg" className="inline-block md:w-10" />
 
-              <input 
-                type="text" 
-                value={search}
-                className="border-2 border-black w-full md:w-80 ml-2 font-serif italic text-lg p-3 inline-block" 
-                onChange={event => {
-                  setSearch(event.target.value)
-                  setPage(1)
-                }}
-              />
-              
-              <button 
-                className="ml-5 text-2xl border-2 border-black p-2" 
-                onClick={event => {
-                  event.preventDefault()
+                <input 
+                  type="text" 
+                  value={search}
+                  className="border-2 border-black w-full md:w-80 ml-2 font-serif italic text-lg p-3 inline-block" 
+                  onChange={event => {
+                    setSearch(event.target.value)
+                    setPage(1)
+                  }}
+                />
+                
+                <button 
+                  className="ml-5 text-2xl border-2 border-black p-2" 
+                  onClick={event => {
+                    event.preventDefault()
 
-                  let newSelectedFacets : SelectedFacets = {}
+                    let newSelectedFacets : SelectedFacets = {}
 
-                  Object.keys(selectedFacets).forEach(selectedFacetGroup => {
-                    if(selectedFacetGroup == currentFacetGroup) {
-                      return
-                    }
-                    
-                    newSelectedFacets[selectedFacetGroup] = selectedFacets[selectedFacetGroup]
-                  })
+                    Object.keys(selectedFacets).forEach(selectedFacetGroup => {
+                      if(selectedFacetGroup == currentFacetGroup) {
+                        return
+                      }
+                      
+                      newSelectedFacets[selectedFacetGroup] = selectedFacets[selectedFacetGroup]
+                    })
 
-                  setSelectedFacets(newSelectedFacets)
-                  onSelection(newSelectedFacets)
-                }}>
-                Clear
-              </button>
-            </div>
-            
+                    setSelectedFacets(newSelectedFacets)
+                    onSelection(newSelectedFacets)
+                  }}>
+                  Clear
+                </button>
+              </div>
+            )}
             <button onClick={closeArea} className="">
               <img src="./icons/x.svg" />
             </button>
@@ -163,7 +165,12 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
             </div>
           )}
           <div className="flex flex-wrap mt-5">
-            {currentFilteredList().map((facet) => {
+            {currentFilteredList.length == 0 && (
+              <div className="text-2xl">
+                No filters in this category with this query
+              </div>
+            )}
+            {currentFilteredList.map((facet) => {
               const currentSelectedFacets = selectedFacets[facet.group] || []
 
               return (
