@@ -64,11 +64,13 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
     event.preventDefault()
     setIsOpen(false)
     setSearch("")
+    setCurrentFacetGroup("")
   }
 
   return (
     <>
-      <div className="flex flex-wrap">
+      <div className="flex flex-wrap items-center">
+        <label className="italic font-serif text-lg p-2 mt-5 mr-2">Filter by:</label>
         {Object.keys(FacetTypeList).map((facetGroupName) => {
           const facetGroupIdName = (FacetTypeList as { [key: string]: string })[facetGroupName]
           let buttonClass = `font-serif italic text-lg flex items-center border-2 mr-2 p-2 px-3 mt-5 `
@@ -85,7 +87,12 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
               className={buttonClass}
               onClick={async (event) => {
                 event.preventDefault()
+                if(currentFacetGroup == facetGroupIdName) {
+                  closeArea(event)
+                  return
+                }
                 await selectFacetGroup(facetGroupName, facetGroupIdName)
+                setIsOpen(true)
               }}>
                 <label className="">
                   {facetGroupName}
@@ -107,12 +114,12 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
         <div className="p-5 bg-white border-2 border-black mt-5">
           <div className="justify-between flex">
             <div className="flex">
-              <img src="./icons/search.svg" className="w-10" />
+              <img src="./icons/search.svg" className="inline-block md:w-10" />
 
               <input 
                 type="text" 
                 value={search}
-                className="border-2 border-black w-80 ml-2 font-serif italic text-lg p-3" 
+                className="border-2 border-black w-full md:w-80 ml-2 font-serif italic text-lg p-3 inline-block" 
                 onChange={event => {
                   setSearch(event.target.value)
                   setPage(1)
@@ -141,7 +148,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
               </button>
             </div>
             
-            <button onClick={closeArea}>
+            <button onClick={closeArea} className="">
               <img src="./icons/x.svg" />
             </button>
           </div>

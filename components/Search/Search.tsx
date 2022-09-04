@@ -23,6 +23,8 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
   const [nextResult, setNextResult] = useState(null as Result | null)
   const [badSearch, setBadSearch] = useState(false)
   const [selectedFacets, setSelectedFacets] = useState({} as SelectedFacets)
+  const [startedSearch, setStartedSearch] = useState(false)
+  const [usedPageButtons, setUsedPageButtons] = useState(false)
 
   const router = useRouter()
 
@@ -52,6 +54,7 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
         updateUrl()
         setResult(data as Result)
         setBadSearch(false)
+        setStartedSearch(true)
         return
       }
 
@@ -73,6 +76,7 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
   }
 
   const nextPage = () => {
+    setUsedPageButtons(true)
     updateQueryAndSearch({
       ...query,
       page: query.page + 1
@@ -80,6 +84,8 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
   }
 
   const prevPage = () => {
+    setUsedPageButtons(true)
+
     updateQueryAndSearch({
       ...query,
       page: query.page - 1
@@ -100,6 +106,7 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
           type="text"
           value={query.query.any}
           className="border-2 border-black w-full p-3 font-serif italic text-2xl"
+
           onChange={(event) => {
             const value = event.target.value
             updateQueryAndSearch({
@@ -110,9 +117,16 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
               }
             })
           }}
+
+          onKeyDown={(event) => {
+            if(event.key == "Enter") {
+              event.preventDefault()
+              runSearch(query)
+            }
+          }}
         />
 
-        {query.query.any.length > 0 && (
+        {result && (
           <SearchFacetArea
             query={query.query.any}
             facetsPerPage={50}
@@ -141,23 +155,40 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
             <SearchResults query={query} result={result} />
             : (
               <div className="text-3xl uppercase font-bold">
-                No results found
+                {startedSearch && (
+                  <>
+                    No results found
+                  </>
+                )}
+                {!startedSearch && (
+                  <>
+                    Start by typing in a search text
+                  </>
+                )}
               </div>
             )
         )}
       </div>
       {query.page > 1 && haveResults && (
-        <div className="fixed inset-y-1/2 left-4 block rounded-full bg-white w-14 h-14 block border-2 border-black">
-          <a href="#" onClick={(event) => prevPage()}>
-            <img src="./icons/left.svg" className="w-full" />
-          </a>
+        <div className={`fixed inset-y-1/2 left-4 text-center text-lg`}>
+          <label className={`pb-2 block ${!usedPageButtons ? 'block' : 'invisible'}`}>Prev</label>
+          <div className="rounded-full bg-white w-14 h-14 block border-2 border-black">
+            <a href="#" onClick={(event) => prevPage()}>
+              <img src="./icons/left.svg" className="w-full" />
+            </a>
+          </div>
+          <label className={`pt-2 block ${!usedPageButtons ? 'block' : 'invisible'}`}>Page</label>
         </div>
       )}
       {haveMoreResults && (
-        <div className="fixed inset-y-1/2 right-4 rounded-full bg-white w-14 h-14 block border-2 border-black">
-          <a href="#" onClick={(event) => nextPage()}>
-            <img src="./icons/right.svg" className="w-full" />
-          </a>
+        <div className={`fixed inset-y-1/2 right-4 text-center text-lg`}>
+          <label className={`pb-2 block ${!usedPageButtons ? 'block' : 'invisible'}`}>Next</label>
+          <div className="rounded-full bg-white w-14 h-14 block border-2 border-black">
+            <a href="#" onClick={(event) => nextPage()}>
+              <img src="./icons/right.svg" className="w-full" />
+            </a>
+          </div>
+          <label className={`pt-2 block ${!usedPageButtons ? 'block' : 'invisible'}`}>Page</label>
         </div>
       )}
     </div>
