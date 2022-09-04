@@ -18,7 +18,7 @@ export default function SearchItem({ doc }: SearchItemProps) {
   const imageURL = `http://archive.org/services/img/${doc.identifier}`
 
   return (
-    <div className="border-2 border-rose-200 flex justify-between flex-col max-w-xs">
+    <div className="border-2 border-rose-200 flex justify-between flex-col lg:max-w-xs mb-5 lg:mb-0">
       <div className="w-full h-full">
         <img src={imageURL} className="w-full" />
       </div>

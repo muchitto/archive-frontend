@@ -8,7 +8,7 @@ export default function Document() {
     <Html className="scroll-smooth">
       <Head />
       <body>
-        <div className="container mx-auto max-w-ld rounded-md">
+        <div className="container mx-auto max-w-ld rounded-md p-5">
           <header className="py-10">
             <div className="flex items-center w-full">
               <img src="/icons/logo.svg" />

@@ -17,7 +17,7 @@ export default function SearchResults({ result, query }: SearchResultsProps) {
         <div>Results found: {numResults}</div>
         <div>Pages: {query.page} / {allPages}</div>
       </div>
-      <div className="grid grid-flow-row-dense grid-cols-4 gap-4">
+      <div className="md:grid md:grid-flow-row-dense md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {result.response.docs.map((doc) => {
           return (<SearchItem doc={doc} key={doc.identifier} />)
         })}
