@@ -7,7 +7,6 @@ import { SelectedFacets, FetchDataWithQuery, Doc, MediaType, AllMediaTypes, Quer
 import SearchItem from "./SearchItem"
 import SearchResults from "./SearchResults"
 import { useRouter } from "next/router"
-import SearchFacet from "./SearchFacet"
 import SearchFacetArea from "./SearchFacetArea"
 
 interface SearchProps {
