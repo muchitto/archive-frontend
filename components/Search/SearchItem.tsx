@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { useEffect } from "react";
-import { Doc } from "../utils/Archive";
+import { Doc } from "../../utils/Archive";
 
 interface SearchItemProps {
   doc: Doc
@@ -23,7 +24,9 @@ export default function SearchItem({ doc }: SearchItemProps) {
       </div>
       <div className="flex flex-col mt-5 p-2 w-full">
         <div className="text-lg pb-5 text-center	p-5 w-full">
-          {doc.title}
+          <Link href={`https://archive.org/details/${doc.identifier}`}>
+            {doc.title}
+          </Link>
         </div>
         <div className="flex">
           {MediaTypeIcons[doc.mediatype] && (

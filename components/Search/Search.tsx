@@ -3,12 +3,12 @@ import style from "./Search.module.css"
 import { stringify, parse } from "query-string"
 
 import { debounce, throttle } from 'lodash'
-import { FetchDataWithQuery, Doc, MediaType, AllMediaTypes, Query, QueryDetail, Result, FacetType, FacetTypeList, FetchFacets, FacetSearchResult, Facet } from "../utils/Archive"
+import { SelectedFacets, FetchDataWithQuery, Doc, MediaType, AllMediaTypes, Query, QueryDetail, Result, FacetType, FacetTypeList, FetchFacets, FacetSearchResult, Facet } from "../../utils/Archive"
 import SearchItem from "./SearchItem"
 import SearchResults from "./SearchResults"
 import { useRouter } from "next/router"
 import SearchFacet from "./SearchFacet"
-import SearchFacetArea, { SelectedFacets } from "./SearchFacetArea"
+import SearchFacetArea from "./SearchFacetArea"
 
 interface SearchProps {
   initialQuery: Query
@@ -63,7 +63,6 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
   }, 1000), [isSearching])
 
   const updateQueryAndSearch = async (query: Query) => {
-    console.log(query)
     setQuery(query)
     runSearch(query)
 
@@ -88,14 +87,6 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
   }
 
   const updateUrl = () => {
-    router.replace({
-      query: {
-        ...router.query,
-        row: query.rows,
-        page: query.page,
-        any: query.query.any
-      }
-    })
   }
 
   return (
@@ -120,20 +111,26 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
             })
           }}
         />
-        
-        <SearchFacetArea 
-          query={query.query.any} 
-          facetsPerPage={50} 
-          onSelection={(selectedFacets: SelectedFacets) => {
-            runSearch({
-              ...query,
-              query: {
-                any: query.query.any,
-                facets: selectedFacets
-              },
-            })
-          }} 
-        />
+
+        {query.query.any.length > 0 && (
+          <SearchFacetArea
+            query={query.query.any}
+            facetsPerPage={50}
+            onSelection={(selectedFacets: SelectedFacets) => {
+              setQuery({
+                ...query,
+                page: 1
+              })
+              runSearch({
+                ...query,
+                query: {
+                  any: query.query.any,
+                  facets: selectedFacets
+                },
+              })
+            }}
+          />
+        )}
       </form>
       <div className="py-5">
         {isSearching ? (

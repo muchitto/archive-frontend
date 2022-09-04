@@ -1,6 +1,9 @@
 import { type } from "os"
 import { stringify } from "querystring"
-import { SelectedFacets } from "../components/SearchFacetArea"
+
+export type SelectedFacets = { 
+  [key: string] : Facet[] 
+}
 
 export interface Result {
   responseHeader: {

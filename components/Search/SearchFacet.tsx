@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Facet, FacetSearchResult } from "../utils/Archive";
+import { Facet, FacetSearchResult } from "../../utils/Archive";
 
 interface SearchFacetProps {
   facet: Facet

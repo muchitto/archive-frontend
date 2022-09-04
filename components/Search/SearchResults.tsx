@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Doc, Query, Result } from "../utils/Archive";
+import { Doc, Query, Result } from "../../utils/Archive";
 import SearchItem from "./SearchItem";
 
 interface SearchResultsProps {

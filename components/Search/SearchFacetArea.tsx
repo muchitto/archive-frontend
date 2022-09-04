@@ -1,10 +1,6 @@
 import { MouseEventHandler, useState } from "react"
-import { Facet, FacetSearchResult, FacetTypeList } from "../utils/Archive"
-import SearchFacet from "./SearchFacet"
-
-export type SelectedFacets = { 
-  [key: string] : Facet[] 
-}
+import { Facet, FacetSearchResult, FacetTypeList, SelectedFacets } from "../../utils/Archive"
+import style from "./Search.module.scss"
 
 interface SearchFacetAreaProps {
   facetsPerPage: number
@@ -20,7 +16,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
   const [search, setSearch] = useState("")
   const [selectedFacets, setSelectedFacets] = useState({} as SelectedFacets)
   const [currentFacetGroup, setCurrentFacetGroup] = useState("")
-
+  
   const filterFacet = (facet : Facet) => {
     if(!search) {
       return true
@@ -75,16 +71,29 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
       <div className="flex flex-wrap">
         {Object.keys(FacetTypeList).map((facetGroupName) => {
           const facetGroupIdName = (FacetTypeList as { [key: string]: string })[facetGroupName]
+          let buttonClass = `font-serif italic text-lg flex items-center border-2 mr-2 p-2 px-3 mt-5 `
+
+          if(currentFacetGroup == facetGroupIdName && loadingFacet == "") {
+            buttonClass += "border-white bg-black text-white"
+          } else {
+            buttonClass += "border-black bg-white text-black"
+          }
+
           return (
             <button
-              className="flex items-center border-2 border-black mr-2 p-2 px-3 mt-5 bg-white"
+              className={buttonClass}
               onClick={async (event) => {
                 event.preventDefault()
                 await selectFacetGroup(facetGroupName, facetGroupIdName)
               }}>
-                <label className="font-serif italic text-lg ">
+                <label className="">
                   {facetGroupName}
                 </label>
+                {selectedFacets[facetGroupIdName] && selectedFacets[facetGroupIdName].length > 0 && (
+                  <span className="ml-2">
+                    ({selectedFacets[facetGroupIdName].length})
+                  </span>
+                )}
         
                 {(loadingFacet == facetGroupName) && (
                   <img src="./icons/loading.svg" className="animate-reverse-spin w-6 ml-5" />
@@ -109,16 +118,24 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
                 }}
               />
               
-              <button className="ml-5 text-2xl border-2 border-black p-2" onClick={event => {
-                event.preventDefault()
+              <button 
+                className="ml-5 text-2xl border-2 border-black p-2" 
+                onClick={event => {
+                  event.preventDefault()
 
-                const newSelectedFacets = {
-                  ...selectedFacets
-                }
+                  let newSelectedFacets : SelectedFacets = {}
 
-                setSelectedFacets(newSelectedFacets)
-                onSelection(newSelectedFacets)
-              }}>
+                  Object.keys(selectedFacets).forEach(selectedFacetGroup => {
+                    if(selectedFacetGroup == currentFacetGroup) {
+                      return
+                    }
+                    
+                    newSelectedFacets[selectedFacetGroup] = selectedFacets[selectedFacetGroup]
+                  })
+
+                  setSelectedFacets(newSelectedFacets)
+                  onSelection(newSelectedFacets)
+                }}>
                 Clear
               </button>
             </div>
@@ -143,9 +160,11 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
 
               return (
                 <>
-                <div className="p-2">
+                <div className="p-2 flex justify-center">
                   <input 
                     type="checkbox"
+                    className={`invisible ${style.searchFacetCheckbox}`}
+                    id={`facet_${facet.n}`}
                     value={facet.n}
                     checked={(currentSelectedFacets.length > 0) ? currentSelectedFacets.some(selectedFacet => selectedFacet.n == facet.n) : false}
                     onChange={(event) => {
@@ -165,8 +184,8 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
                     }}
                   />
 
-                  <label className="ml-2 italic text-lg tracking-wide">
-                    {facet.val}
+                  <label className="italic text-lg tracking-wide flex" htmlFor={`facet_${facet.n}`}>
+                    <span className="ml-2">{facet.val}</span>
                   </label>
                 </div>
                 </>

@@ -1,0 +1,14 @@
+.searchFacetCheckbox {
+    & + label::before {
+        content: " ";
+        background-image: url('../../public/icons/square.svg');
+        background-repeat: no-repeat;
+        background-size: contain;
+        width: 25px;
+        height: 25px;
+    }
+
+    &:checked + label::before {
+        background-image: url('../../public/icons/check-square.svg');
+    }
+}

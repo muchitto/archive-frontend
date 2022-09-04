@@ -1,33 +1,24 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import Search from '../components/Search'
-import { FacetGroup, FetchDataWithQuery, FetchFacets, Query, Result } from '../utils/Archive'
+import Search from '../components/Search/Search'
+import { Facet, FetchDataWithQuery, FetchFacets, Query, Result } from '../utils/Archive'
 
 interface HomeProps {
   initialQuery: Query
   initialResult: Result
-  facetGroups: FacetGroup[]
 }
 
 const Home: NextPage<HomeProps> = ({initialQuery, initialResult}: HomeProps) => {
   return (
-    <div className="container mx-auto max-w-ld rounded-md">
-      <header className="py-10">
-        <div className="flex items-center w-full">
-          <img src="./icons/logo.svg" />
-          <label className='inline-block text-6xl font-bold ml-10 uppercase'>
-            Archive
-          </label>
-        </div>
-      </header>
+    <>
       <div>
         <Search 
           initialQuery={initialQuery}
           initialResult={initialResult} 
         />
       </div>
-    </div>
+    </>
   )
 }
 
