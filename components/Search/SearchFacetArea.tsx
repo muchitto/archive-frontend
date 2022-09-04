@@ -165,11 +165,11 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
                   <input 
                     type="checkbox"
                     className={`invisible ${style.searchFacetCheckbox}`}
-                    id={`facet_${facet.n}`}
-                    value={facet.n}
-                    checked={(currentSelectedFacets.length > 0) ? currentSelectedFacets.some(selectedFacet => selectedFacet.n == facet.n) : false}
+                    id={`facet_${facet.val}`}
+                    value={facet.val}
+                    checked={(currentSelectedFacets.length > 0) ? currentSelectedFacets.some(selectedFacet => selectedFacet == facet) : false}
                     onChange={(event) => {
-                      let newCurrentSelectedFacets = currentSelectedFacets.filter(selectedFacet => selectedFacet.n != facet.n)
+                      let newCurrentSelectedFacets = currentSelectedFacets.filter(selectedFacet => selectedFacet != facet)
 
                       if(event.target.checked) {
                         newCurrentSelectedFacets.push(facet)
@@ -185,7 +185,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
                     }}
                   />
 
-                  <label className="italic text-lg tracking-wide flex" htmlFor={`facet_${facet.n}`}>
+                  <label className="italic text-lg tracking-wide flex" htmlFor={`facet_${facet.val}`}>
                     <span className="ml-2">{facet.val}</span>
                   </label>
                 </div>
