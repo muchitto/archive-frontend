@@ -59,7 +59,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
     let newFacetList = facetList.filter(filterFacet)
     newFacetList = newFacetList.slice(facetsPerPage * (page - 1), facetsPerPage * page)
     return newFacetList
-  }, [facetList, search])
+  }, [facetList, search, page])
 
   const closeArea : MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault()
@@ -174,8 +174,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
               const currentSelectedFacets = selectedFacets[facet.group] || []
 
               return (
-                <>
-                <div className="p-2 flex justify-center">
+                <div className="p-2 flex justify-center" key={facet.val}>
                   <input 
                     type="checkbox"
                     className={`invisible ${style.searchFacetCheckbox}`}
@@ -203,7 +202,6 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
                     <span className="ml-2">{facet.val}</span>
                   </label>
                 </div>
-                </>
               )
             })}
           </div>
