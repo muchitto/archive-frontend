@@ -114,7 +114,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
       {isOpen && (
         <div className="p-5 bg-white border-2 border-black mt-5">
           <div className="justify-between flex">
-            {currentFilteredList.length > 0 && (
+            {facetList.length > 0 && (
               <div className="flex">
                 <img src="./icons/search.svg" className="inline-block md:w-10" />
 
@@ -165,7 +165,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
             </div>
           )}
           <div className="flex flex-wrap mt-5">
-            {currentFilteredList.length == 0 && (
+            {facetList.length == 0 && (
               <div className="text-2xl">
                 No filters in this category with this query
               </div>
