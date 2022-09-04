@@ -12,7 +12,7 @@ export default function Document() {
           <header className="py-10">
             <div className="flex items-center w-full">
               <img src="/icons/logo.svg" />
-              <label className='inline-block text-6xl font-bold ml-10 uppercase'>
+              <label className='inline-block text-4xl md:text-6xl font-bold ml-5 md:ml-10 uppercase'>
                 <Link href="/">
                   Archive
                 </Link>
