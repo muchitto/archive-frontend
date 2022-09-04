@@ -81,6 +81,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection } :
 
           return (
             <button
+              key={facetGroupIdName}
               className={buttonClass}
               onClick={async (event) => {
                 event.preventDefault()
