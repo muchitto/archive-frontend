@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import style from "./Search.module.css"
 import { stringify, parse } from "query-string"
 
@@ -11,37 +11,22 @@ import SearchFacetArea from "./SearchFacetArea"
 
 interface SearchProps {
   initialQuery: Query
-  initialResult: Result
 }
 
-export default function Search({ initialQuery, initialResult }: SearchProps) {
+export default function Search({ initialQuery }: SearchProps) {
   const [isSearching, setIsSearching] = useState(false)
   const [query, setQuery] = useState(initialQuery)
-  const [result, setResult] = useState(initialResult)
-  const [lastResult, setLastResult] = useState(null as Result | null)
-  const [nextResult, setNextResult] = useState(null as Result | null)
+  const [result, setResult] = useState({} as Result)
   const [badSearch, setBadSearch] = useState(false)
-  const [selectedFacets, setSelectedFacets] = useState({} as SelectedFacets)
-  const [startedSearch, setStartedSearch] = useState(false)
+  const [selectedFacets, setSelectedFacets] = useState(initialQuery.query.facets)
+  const [initialized, setInitialized] = useState(false)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
+  const [facetAreaOpen, setFacetAreaOpen] = useState(false)
 
   const router = useRouter()
 
   const haveMoreResults = result?.response?.numFound / query.rows > query.page
   const haveResults = result?.response?.docs.length > 0
-
-  const bufferResults = () => {
-    if (haveMoreResults) {
-      FetchDataWithQuery({
-        ...query,
-        page: query.page + 1
-      }).then((data) => {
-        if (data) {
-          setNextResult(data as Result)
-        }
-      })
-    }
-  }
 
   const runSearch = useCallback(debounce((query: Query) => {
     setIsSearching(true)
@@ -49,11 +34,12 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
     FetchDataWithQuery(query).then((data) => {
       setIsSearching(false)
 
+      setInitialized(true)
+
       if (data) {
-        updateUrl()
+        updateUrl(query)
         setResult(data as Result)
         setBadSearch(false)
-        setStartedSearch(true)
         return
       }
 
@@ -91,11 +77,38 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
     })
   }
 
-  const updateUrl = () => {
+  const updateUrl = (query: Query) => {
+    const facetList : { [key:string]: string[] } = {}
+    
+    for(let facetGroup in query.query.facets) {
+      facetList["facet:" + facetGroup] = query.query.facets[facetGroup].map((facet) => facet.val + "")
+    }
+
+    router.push({
+      pathname: `/`,
+      query: {
+        ...facetList,
+        any: query.query.any,
+        page: query.page
+      }
+    }, undefined, {
+      shallow: true
+    })
   }
 
-  return (
+  useEffect(() => {
+    if(query.query.any) {
+      runSearch(query)
+    }
+  }, [])
+
+  return ( 
     <div>
+      {isSearching && facetAreaOpen && (
+        <div className="absolute top-5 right-5">
+          <img src="./icons/loading.svg" className="animate-reverse-spin w-8" />
+        </div>
+      )}
       <form onSubmit={(event) => {
         event.preventDefault()
 
@@ -125,21 +138,23 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
           }}
         />
 
-        {result && (
+        {(result?.response?.docs.length > 0 || selectedFacets) && initialized && (
           <SearchFacetArea
-            query={query.query.any}
+            query={query}
             facetsPerPage={50}
+            onOpen={(open) => {
+              setFacetAreaOpen(open)
+            }}
             onSelection={(selectedFacets: SelectedFacets) => {
-              setQuery({
-                ...query,
-                page: 1
-              })
-              runSearch({
+              setSelectedFacets(selectedFacets)
+
+              updateQueryAndSearch({
                 ...query,
                 query: {
                   any: query.query.any,
                   facets: selectedFacets
                 },
+                page: 1
               })
             }}
           />
@@ -154,12 +169,12 @@ export default function Search({ initialQuery, initialResult }: SearchProps) {
             <SearchResults query={query} result={result} />
             : (
               <div className="text-3xl uppercase font-bold">
-                {startedSearch && (
+                {initialized && (
                   <>
                     No results found
                   </>
                 )}
-                {!startedSearch && (
+                {!initialized && (
                   <>
                     Start by typing in a search text
                   </>

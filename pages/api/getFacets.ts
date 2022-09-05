@@ -1,15 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Facet, FacetSearchResult, FetchFacets } from '../../utils/Archive'
+import { Facet, FacetSearchResult, FacetSearchResultPretty, FetchFacets, FetchFacetsPretty } from '../../utils/Archive'
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse< FacetSearchResult | boolean>
+    res: NextApiResponse< FacetSearchResultPretty | boolean>
   ) {
     const facet = req.query.facet as string
-    const query = req.query.query as string
+    const any = req.query.any as string
 
-    const facets = await FetchFacets({
-        query,
+    const facets = await FetchFacetsPretty({
+        any,
         facet,
     })
 
@@ -17,11 +17,11 @@ export default async function handler(
         return false
     }
 
-    let output : boolean | FacetSearchResult = false
+    let output : boolean | FacetSearchResultPretty = false
 
     if(facets) {
         output = {
-            ...(facets as FacetSearchResult)
+            ...(facets as FacetSearchResultPretty)
         }
     }
 
