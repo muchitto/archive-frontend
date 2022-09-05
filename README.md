@@ -8,7 +8,7 @@ yarn
 yarn dev
 ```
 
-The site is also deployed to Vercel as I have not used it before and wanted to try it out (though currently it is only for the ease of hosting).
+The site is also deployed to Vercel as I have not used it before and wanted to try it out (though currently it is only for the ease of hosting). Maybe in the future move this to google cloud or something.
 
 ## Things that I want to implement someday
 * A specific item view. Currently it is only a frontend to the search.
