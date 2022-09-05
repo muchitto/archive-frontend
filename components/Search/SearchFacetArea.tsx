@@ -20,16 +20,20 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection, on
   const [selectedFacets, setSelectedFacets] = useState(query.query.facets)
   const [currentFacetGroup, setCurrentFacetGroup] = useState(null as FacetGroup | null)
   const lastSearchStr = useRef(query.query.any)
+  const lastPage = useRef(query.page)
 
   useEffect(() => {
-    if(currentFacetGroup && lastSearchStr.current != query.query.any) {
+    if(lastPage.current != query.page) {
+      closeArea()
+    } else if(currentFacetGroup && lastSearchStr.current != query.query.any) {
       if(query.query.any != "") {
         debounceSelectFacetGroup(currentFacetGroup)
       } else {
-        closeArea(currentFacetGroup)
+        closeArea()
       }
     }
 
+    lastPage.current = query.page
     lastSearchStr.current = query.query.any
   }, [query])
 
@@ -79,7 +83,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection, on
     return newFacetList
   }, [facetList, search, page])
 
-  const closeArea = (facetGroup: FacetGroup) => {
+  const closeArea = () => {
     setIsOpen(false)
     setSearch("")
     setCurrentFacetGroup(null)
@@ -137,7 +141,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection, on
               onClick={async (event) => {
                 event.preventDefault()
                 if(currentFacetGroup?.idName == facetGroupIdName) {
-                  closeArea(facetGroup)
+                  closeArea()
                   return
                 }
                 openArea(facetGroup)
@@ -191,7 +195,7 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection, on
             </div>
             <button onClick={event => {
               event.preventDefault()
-              closeArea(currentFacetGroup as FacetGroup)
+              closeArea()
             }} className="">
               <img src="./icons/x.svg" />
             </button>
