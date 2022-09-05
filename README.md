@@ -1,6 +1,6 @@
 # Archive.org frontend demo
 
-This is just a demo/experiment for a archive.org frontend. The current official one is pretty unusable but necessary as there are no alternatives.
+This is just a demo/experiment for an archive.org frontend. The current official one is pretty unusable but necessary as there are no alternatives.
 
 The site is built with next.js and tailwind and the dev environment can be started with these commands:
 ```
