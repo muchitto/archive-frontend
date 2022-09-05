@@ -110,14 +110,19 @@ export function QueryDetailFormatter(data: QueryDetail) {
 }
 
 export interface CategoryQuery {
-  query: string
+  any: string
   facet: string 
 }
 
 export interface Facet {
-  n: number
+  n?: number
   val: number | string
-  group: string
+  group: FacetGroup
+}
+
+export interface FacetGroup {
+  name: string
+  idName: string
 }
 
 export interface FacetSearchResult {
@@ -126,6 +131,11 @@ export interface FacetSearchResult {
   morf: string 
   options: Facet[]
   submit: string
+}
+
+export interface FacetSearchResultPretty {
+  facetGroup: FacetGroup
+  facets: Facet[]
 }
 
 export enum FacetType {
@@ -138,7 +148,7 @@ export enum FacetType {
   Language = "languageSorter"
 }
 
-export const FacetTypeList = {
+export const FacetTypeList : { [key: string] : FacetType } = {
   "Creator": FacetType.Creator,
   "Collection": FacetType.Collection,
   "Subject": FacetType.Subject,
@@ -148,13 +158,70 @@ export const FacetTypeList = {
   "Language": FacetType.Language,
 }
 
+export function GetFacetProperNameWithId(idName: string) {
+  return Object.keys(FacetTypeList)[Object.values(FacetTypeList).indexOf(idName as FacetType)] || ""
+}
+
 export async function FetchFacets(query: CategoryQuery) : Promise<FacetSearchResult | boolean> {
-  const searchURL = `https://archive.org/search.php?query=${query.query}&morf=${query.facet}&headless=1&facets_xhr=facets&output=json`
+  const searchURL = `https://archive.org/search.php?query=${query.any}&morf=${query.facet}&headless=1&facets_xhr=facets&output=json`
 
   const fetchedFacets = await fetch(searchURL)
   const result = await fetchedFacets.json() as FacetSearchResult
 
   return result
+}
+
+export async function FetchFacetsPretty(query: CategoryQuery) : Promise<FacetSearchResultPretty | boolean> {
+  const facets = await FetchFacets(query)
+  
+  if(!facets) {
+    return false
+  }
+
+  const facetGroupProperName = GetFacetProperNameWithId(query.facet)
+
+  const facetGroup : FacetGroup = {
+    name: facetGroupProperName,
+    idName: query.facet
+  }
+
+  const facetList = (facets as FacetSearchResult).options.map(facet => {
+    facet.group = facetGroup
+    return facet
+  })
+
+  const facetResultPretty : FacetSearchResultPretty = {
+    facetGroup: facetGroup,
+    facets: facetList
+  }
+
+  return facetResultPretty
+}
+
+export async function FetchAllFacetsPretty(any: string) : Promise<FacetSearchResultPretty[] | boolean> {
+  const facetResultList : FacetSearchResultPretty[] = []
+
+  for(let facetTypeProperName of Object.keys(FacetTypeList)) {
+    const facetIdName = FacetTypeList[facetTypeProperName]
+
+    try {
+      const facetListPretty = await FetchFacetsPretty({
+        any,
+        facet: facetIdName
+      })
+
+      if(!facetListPretty) {
+        console.log(`could not fetch facets with facet group id ${facetIdName}`)
+        continue 
+      }
+
+      facetResultList.push(facetListPretty as FacetSearchResultPretty)
+    } catch(error) {
+      console.log(`could not fetch facets with facet group id ${facetIdName}`)
+    }
+  }
+
+  return facetResultList
 }
 
 export async function FetchDataWithQuery(query: Query): Promise<Result | boolean> {
@@ -171,8 +238,6 @@ export async function FetchDataWithQuery(query: Query): Promise<Result | boolean
   if(query.query) {
     urlPrefix += `&q=${QueryDetailFormatter(query.query)}`
   }
-
-  console.log(urlPrefix)
   
   const data = await fetch(urlPrefix)
 
