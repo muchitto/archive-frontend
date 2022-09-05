@@ -24,11 +24,16 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
   const lastPage = useRef(query.page)
 
   useEffect(() => {
+    const mainSearchTextChanged = lastSearchStr.current != query.query.any
+    
     if(lastPage.current != query.page) {
       closeArea()
-    } else if(currentFacetGroup && lastSearchStr.current != query.query.any) {
+    } else if(currentFacetGroup && mainSearchTextChanged) {
       if(query.query.any != "") {
-        debounceSelectFacetGroup(currentFacetGroup)
+        debounceSelectFacetGroup(query.query.any, currentFacetGroup)?.then(() => {
+          // TODO: Check that the filters are valid still
+          // This means that everytime search text has changed, we have to load every facet
+        })
       } else {
         closeArea()
       }
@@ -48,10 +53,10 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
 
   const totalPages = Math.ceil(facetList.filter(filterFacet).length / facetsPerPage)
 
-  const selectFacetGroup = async (facetGroup: FacetGroup) => {
+  const selectFacetGroup = async (queryStr: string, facetGroup: FacetGroup) => {
     setLoadingFacetGroup(facetGroup)
 
-    const facetReq = await fetch(`/api/getFacets?facet=${facetGroup.idName}&any=${query.query.any}`)
+    const facetReq = await fetch(`/api/getFacets?facet=${facetGroup.idName}&any=${queryStr}`)
     const facets = await facetReq.json() as FacetSearchResultPretty | boolean
 
     setLoadingFacetGroup(null)
@@ -74,8 +79,8 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
     setIsOpen(true)
   }
 
-  const debounceSelectFacetGroup = useCallback(debounce(async (facetGroup : FacetGroup) => {
-    await selectFacetGroup(facetGroup)
+  const debounceSelectFacetGroup = useCallback(debounce(async (queryStr: string, facetGroup : FacetGroup) => {
+    await selectFacetGroup(queryStr, facetGroup)
   }, 1000), [])
 
   const currentFilteredList = useMemo(() => {
@@ -92,16 +97,16 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
   }
 
   const openArea = async (facetGroup: FacetGroup) => {
-    await selectFacetGroup(facetGroup)
+    await selectFacetGroup(query.query.any, facetGroup)
     setIsOpen(true)
     onOpen(true)
   }
 
-  const clearFacetSelection = () => {
+  const clearFacetSelection = (facetGroup: FacetGroup) => {
     let newSelectedFacets : SelectedFacets = {}
 
     Object.keys(selectedFacets).forEach(selectedFacetGroup => {
-      if(selectedFacetGroup == currentFacetGroup?.idName) {
+      if(selectedFacetGroup == facetGroup?.idName) {
         return
       }
       
@@ -173,7 +178,7 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
                 className="text-2xl border-2 border-black p-2" 
                 onClick={event => {
                   event.preventDefault()
-                  clearFacetSelection()
+                  clearFacetSelection(currentFacetGroup as FacetGroup)
                 }}>
                 Clear
               </button>
