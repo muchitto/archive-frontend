@@ -21,7 +21,7 @@ export default function Search({ initialQuery }: SearchProps) {
   const [selectedFacets, setSelectedFacets] = useState(initialQuery.query.facets)
   const [initialized, setInitialized] = useState(false)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
-  const [facetAreaOpen, setFacetAreaOpen] = useState(false)
+  const [isFacetAreaOpen, setIsFacetAreaOpen] = useState(false)
 
   const router = useRouter()
 
@@ -54,10 +54,12 @@ export default function Search({ initialQuery }: SearchProps) {
     setQuery(query)
     runSearch(query)
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    })
+    if(!isFacetAreaOpen) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
   }
 
   const nextPage = () => {
@@ -104,8 +106,8 @@ export default function Search({ initialQuery }: SearchProps) {
 
   return ( 
     <div>
-      {isSearching && facetAreaOpen && (
-        <div className="absolute top-5 right-5">
+      {isSearching && isFacetAreaOpen && (
+        <div className="fixed top-5 right-5">
           <img src="./icons/loading.svg" className="animate-reverse-spin w-8" />
         </div>
       )}
@@ -143,7 +145,7 @@ export default function Search({ initialQuery }: SearchProps) {
             query={query}
             facetsPerPage={50}
             onOpen={(open) => {
-              setFacetAreaOpen(open)
+              setIsFacetAreaOpen(open)
             }}
             onSelection={(selectedFacets: SelectedFacets) => {
               setSelectedFacets(selectedFacets)
