@@ -28,7 +28,11 @@ export default function Search({ initialQuery }: SearchProps) {
   const haveMoreResults = result?.response?.numFound / query.rows > query.page
   const haveResults = result?.response?.docs.length > 0
 
-  const runSearch = useCallback(debounce((query: Query) => {
+  const runSearchDebounced = useCallback(debounce((query: Query) => {
+    runSearch(query)
+  }, 1000), [isSearching])
+
+  const runSearch = (query: Query) => {
     setIsSearching(true)
 
     FetchDataWithQuery(query).then((data) => {
@@ -48,11 +52,16 @@ export default function Search({ initialQuery }: SearchProps) {
     }).catch((error) => {
       console.log(error)
     })
-  }, 1000), [isSearching])
+  }
 
-  const updateQueryAndSearch = async (query: Query) => {
+  const updateQueryAndSearch = async (query: Query, debounced: boolean) => {
     setQuery(query)
-    runSearch(query)
+
+    if(debounced) {
+      runSearchDebounced(query)
+    } else {
+      runSearch(query)
+    }
 
     if(!isFacetAreaOpen) {
       window.scrollTo({
@@ -67,7 +76,7 @@ export default function Search({ initialQuery }: SearchProps) {
     updateQueryAndSearch({
       ...query,
       page: query.page + 1
-    })
+    }, false)
   }
 
   const prevPage = () => {
@@ -76,7 +85,7 @@ export default function Search({ initialQuery }: SearchProps) {
     updateQueryAndSearch({
       ...query,
       page: query.page - 1
-    })
+    }, false)
   }
 
   const updateUrl = (query: Query) => {
@@ -129,7 +138,7 @@ export default function Search({ initialQuery }: SearchProps) {
                 ...query.query,
                 any: value
               }
-            })
+            }, true)
           }}
 
           onKeyDown={(event) => {
@@ -157,7 +166,7 @@ export default function Search({ initialQuery }: SearchProps) {
                   facets: selectedFacets
                 },
                 page: 1
-              })
+              }, false)
             }}
           />
         )}
