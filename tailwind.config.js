@@ -15,7 +15,7 @@ module.exports = {
             transform: 'rotate(360deg)'
           },
         }
-      }
+      },
     },
   },
   plugins: [],

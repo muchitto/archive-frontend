@@ -14,7 +14,7 @@ export const MediaTypeIcons : { [key: string] : string } = {
 
 const metadataURL = "https://archive.org/metadata/"
 
-export default function SearchItem({ doc }: SearchItemProps) {
+export default function ResultItem({ doc }: SearchItemProps) {
   const imageURL = `http://archive.org/services/img/${doc.identifier}`
 
   return (

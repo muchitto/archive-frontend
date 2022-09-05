@@ -1,17 +1,18 @@
 import { debounce } from "lodash"
 import { MouseEvent, useCallback, useEffect, useMemo, useRef } from "react"
 import { MouseEventHandler, useState } from "react"
-import { Facet, FacetGroup, FacetSearchResult, FacetSearchResultPretty, FacetTypeList, Query, SelectedFacets } from "../../utils/Archive"
-import style from "./Search.module.scss"
+import { Facet, FacetGroup, FacetSearchResult, FacetSearchResultPretty, FacetTypeList, Query, SelectedFacets } from "../../../utils/Archive"
+import FacetGroupButton from "./FacetGroupButton"
+import style from "../Search.module.scss"
 
-interface SearchFacetAreaProps {
+interface FacetAreaProps {
   facetsPerPage: number
   query: Query 
   onSelection: (selectedFacets: SelectedFacets) => void
   onOpen: (open: boolean) => void
 }
 
-export default function SearchFacetArea ({ facetsPerPage, query, onSelection, onOpen } : SearchFacetAreaProps) {
+export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen } : FacetAreaProps) {
   const [facetList, setFacetList] = useState([] as Facet[])
   const [page, setPage] = useState(1)
   const [loadingFacetGroup, setLoadingFacetGroup] = useState(null as FacetGroup | null)
@@ -125,42 +126,25 @@ export default function SearchFacetArea ({ facetsPerPage, query, onSelection, on
             name: facetGroupName, 
             idName: facetGroupIdName 
           }
-
-          let buttonClass = `font-serif italic text-lg flex items-center border-2 mr-2 p-2 px-3 mt-5 `
-
-          if(currentFacetGroup?.idName == facetGroupIdName && !loadingFacetGroup?.idName) {
-            buttonClass += "border-white bg-black text-white"
-          } else {
-            buttonClass += "border-black bg-white text-black"
-          }
+          
+          const isLoading = loadingFacetGroup?.idName == facetGroup?.idName
 
           return (
-            <button
-              key={facetGroupIdName}
-              className={buttonClass}
-              onClick={async (event) => {
-                event.preventDefault()
+            <FacetGroupButton 
+              key={facetGroup.idName}
+              isOpened={currentFacetGroup?.idName == facetGroupIdName}
+              isLoading={isLoading as boolean}
+              selectedFacetCount={selectedFacets[facetGroupIdName] ? selectedFacets[facetGroupIdName].length : null}
+              facetGroup={facetGroup}
+              onToggle={() => {
                 if(currentFacetGroup?.idName == facetGroupIdName) {
                   closeArea()
                   return
                 }
                 openArea(facetGroup)
                 setCurrentFacetGroup(facetGroup)
-              }}>
-                <label className="cursor-pointer">
-                  {facetGroupName}
-                </label>
-                {selectedFacets[facetGroupIdName] && selectedFacets[facetGroupIdName].length > 0 && (
-                  <span className="ml-2">
-                    ({selectedFacets[facetGroupIdName].length})
-                  </span>
-                )}
-        
-                {(loadingFacetGroup?.idName == facetGroupIdName) && (
-                  <img src="./icons/loading.svg" className="animate-reverse-spin w-6 ml-5" />
-                )}
-            </button>
-          )
+              }}
+            />)
         })}
       </div>
       {isOpen && (
