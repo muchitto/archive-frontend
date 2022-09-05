@@ -103,11 +103,17 @@ export default function Search({ initialQuery }: SearchProps) {
         page: query.page
       }
     }, undefined, {
-      shallow: true
+      shallow: true,
     })
+    
   }
 
   useEffect(() => {
+    router.beforePopState((state) => {
+      location.reload()
+      return true
+    })
+
     if(query.query.any) {
       runSearch(query)
     }
@@ -198,7 +204,10 @@ export default function Search({ initialQuery }: SearchProps) {
         <div className={`fixed inset-y-1/2 left-4 text-center text-lg`}>
           <label className={`pb-2 block ${!usedPageButtons ? 'block' : 'invisible'}`}>Prev</label>
           <div className="rounded-full bg-white w-14 h-14 block border-2 border-black">
-            <a href="#" onClick={(event) => prevPage()}>
+            <a href="#" onClick={(event) => {
+              event.preventDefault()
+              prevPage()
+            }}>
               <img src="./icons/left.svg" className="w-full" />
             </a>
           </div>
@@ -209,7 +218,10 @@ export default function Search({ initialQuery }: SearchProps) {
         <div className={`fixed inset-y-1/2 right-4 text-center text-lg`}>
           <label className={`pb-2 block ${!usedPageButtons ? 'block' : 'invisible'}`}>Next</label>
           <div className="rounded-full bg-white w-14 h-14 block border-2 border-black">
-            <a href="#" onClick={(event) => nextPage()}>
+            <a href="#" onClick={(event) => {
+              event.preventDefault()
+              nextPage()
+            }}>
               <img src="./icons/right.svg" className="w-full" />
             </a>
           </div>
