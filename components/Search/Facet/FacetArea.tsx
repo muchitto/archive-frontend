@@ -128,11 +128,12 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
           }
           
           const isLoading = loadingFacetGroup?.idName == facetGroup?.idName
+          const isOpened = currentFacetGroup?.idName == facetGroupIdName
 
           return (
             <FacetGroupButton 
               key={facetGroup.idName}
-              isOpened={currentFacetGroup?.idName == facetGroupIdName}
+              isOpened={isOpened}
               isLoading={isLoading as boolean}
               selectedFacetCount={selectedFacets[facetGroupIdName] ? selectedFacets[facetGroupIdName].length : null}
               facetGroup={facetGroup}

@@ -11,9 +11,7 @@ interface FacetGroupButtonProps {
 }
 
 export default function FacetGroupButton({facetGroup, className, selectedFacetCount, isLoading, isOpened, onToggle} : FacetGroupButtonProps) {
-  const [isOpen, setIsOpen] = useState(isOpened)
-
-  const additionalClassName = `${isOpen && !isLoading ? 'border-white bg-black text-white' : 'border-black bg-white text-black'}`
+  const additionalClassName = `${isOpened && !isLoading ? 'border-white bg-black text-white' : 'border-black bg-white text-black'}`
 
   return (
     <button
@@ -21,9 +19,7 @@ export default function FacetGroupButton({facetGroup, className, selectedFacetCo
       className={`font-serif italic text-lg flex items-center border-2 mr-2 p-2 px-3 mt-5 ${additionalClassName} ${className}`}
       onClick={async (event) => {
         event.preventDefault()
-        const newIsOpen = !isOpen
-        setIsOpen(newIsOpen)
-        onToggle(newIsOpen)
+        onToggle(isOpened)
       }}>
       <label className="cursor-pointer">
         {facetGroup.name}
