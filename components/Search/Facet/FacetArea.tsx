@@ -1,121 +1,112 @@
-import { debounce } from "lodash"
-import { MouseEvent, useCallback, useEffect, useMemo, useRef } from "react"
-import { MouseEventHandler, useState } from "react"
-import { Facet, FacetGroup, FacetSearchResult, FacetSearchResultPretty, FacetTypeList, Query, SelectedFacets } from "../../../utils/Archive"
+import { useEffect, useMemo, useRef } from "react"
+import { useState } from "react"
+import { FacetGroup, FacetSearchResultPretty, SearchQuery, FacetGroupsAndFacets, facetTypeList } from "../../../utils/Archive"
 import FacetGroupButton from "./FacetGroupButton"
 import style from "../Search.module.scss"
+import { useQueries, useQuery } from "@tanstack/react-query"
+import useDebounce from "../../../utils/useDebounce"
+import Config from "../../../utils/Config"
+
+import Image from "next/future/image"
+
+import searchIcon from "../../../assets/icons/search.svg"
+import xIcon from "../../../assets/icons/x.svg"
+import upIcon from "../../../assets/icons/up.svg"
+import downIcon from "../../../assets/icons/down.svg"
 
 interface FacetAreaProps {
   facetsPerPage: number
-  query: Query 
-  onSelection: (selectedFacets: SelectedFacets) => void
+  query: SearchQuery
+  onSelection: (selectedFacets: FacetGroupsAndFacets) => void
   onOpen: (open: boolean) => void
 }
 
-export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen } : FacetAreaProps) {
-  const [facetList, setFacetList] = useState([] as Facet[])
+export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }: FacetAreaProps) {
   const [page, setPage] = useState(1)
-  const [loadingFacetGroup, setLoadingFacetGroup] = useState(null as FacetGroup | null)
   const [isOpen, setIsOpen] = useState(false)
-  const [search, setSearch] = useState("")
+  const [filterSearchText, setFilterSearchText] = useState("")
   const [selectedFacets, setSelectedFacets] = useState(query.query.facets)
   const [currentFacetGroup, setCurrentFacetGroup] = useState(null as FacetGroup | null)
-  const lastSearchStr = useRef(query.query.any)
-  const lastPage = useRef(query.page)
 
-  useEffect(() => {
-    const mainSearchTextChanged = lastSearchStr.current != query.query.any
-    
-    if(lastPage.current != query.page) {
-      closeArea()
-    } else if(currentFacetGroup && mainSearchTextChanged) {
-      if(query.query.any != "") {
-        debounceSelectFacetGroup(query.query.any, currentFacetGroup)?.then(() => {
-          // TODO: Check that the filters are valid still
-          // This means that everytime search text has changed, we have to load every facet
-        })
-      } else {
-        closeArea()
-      }
-    }
+  const debouncedSearchText = useDebounce(query.query.any, Config.defaultSearchDebounceTime)
 
-    lastPage.current = query.page
-    lastSearchStr.current = query.query.any
-  }, [query])
+  const facetResults = useQueries({
+    queries: Object.keys(facetTypeList).map(groupIdName => {
+      const facetGroup = facetTypeList[groupIdName]
 
-  const filterFacet = (facet : Facet) => {
-    if(!search) {
-      return true
-    }
-
-    return (facet.val + "").includes(search)
-  }
-
-  const totalPages = Math.ceil(facetList.filter(filterFacet).length / facetsPerPage)
-
-  const selectFacetGroup = async (queryStr: string, facetGroup: FacetGroup) => {
-    setLoadingFacetGroup(facetGroup)
-
-    const facetReq = await fetch(`/api/getFacets?facet=${facetGroup.idName}&any=${queryStr}`)
-    const facets = await facetReq.json() as FacetSearchResultPretty | boolean
-
-    setLoadingFacetGroup(null)
-    setPage(1)
-
-    if(!facets) {
-      return
-    }
-
-    let facetList = (facets as FacetSearchResultPretty).facets
-
-    facetList = facetList.map(facet => {
       return {
-        ...facet,
-        group: facetGroup,
+        queryKey: ['facetGroup', facetGroup.idName, debouncedSearchText],
+        queryFn: () => {
+          return fetch(`/api/getFacets?any=${debouncedSearchText}&facet=${facetGroup.idName}`)
+            .then(res => res.json())
+            .then(res => ({
+              facetGroup,
+              res: res as FacetSearchResultPretty | null
+            }))
+        },
+        retry: true,
+        retryDelay: 1000
       }
     })
+  })
 
-    setFacetList(facetList)
-    setIsOpen(true)
-  }
+  const facetLists = useMemo(() => {
+    const newFacetList : FacetGroupsAndFacets = {}
+    facetResults.forEach(result => {
+      if(!result.data || !result.data.facetGroup || !result.data.res) {
+        return
+      }
 
-  const debounceSelectFacetGroup = useCallback(debounce(async (queryStr: string, facetGroup : FacetGroup) => {
-    await selectFacetGroup(queryStr, facetGroup)
-  }, 1000), [])
+      newFacetList[result.data.facetGroup.idName] = result.data.res.facets
+    });
+    return newFacetList
+  }, [facetResults])
+
+  const currentFacetList = useMemo(() => {
+    if(!currentFacetGroup) {
+      return []
+    }
+
+    return facetLists[currentFacetGroup.idName]
+  }, [currentFacetGroup, facetLists])
 
   const currentFilteredList = useMemo(() => {
-    let newFacetList = facetList.filter(filterFacet)
-    newFacetList = newFacetList.slice(facetsPerPage * (page - 1), facetsPerPage * page)
-    return newFacetList
-  }, [facetList, search, page])
+    const searchFilteredList = currentFacetList.filter(facet => (facet.val + "").toLowerCase().includes(filterSearchText.toLowerCase()))
+
+    return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage)
+  }, [currentFacetList, filterSearchText, page, facetsPerPage])
+
+  useEffect(() => {
+    closeArea()
+  }, [debouncedSearchText])
 
   const closeArea = () => {
     setIsOpen(false)
-    setSearch("")
+    setFilterSearchText("")
     setCurrentFacetGroup(null)
     onOpen(false)
   }
 
   const openArea = async (facetGroup: FacetGroup) => {
-    await selectFacetGroup(query.query.any, facetGroup)
     setIsOpen(true)
     onOpen(true)
   }
 
-  const clearFacetSelection = (facetGroup: FacetGroup) => {
-    let newSelectedFacets : SelectedFacets = {}
+  const facetsThatCanBeSelected = useMemo(() => {
+    const out : FacetGroupsAndFacets = {}
+    for(let groupId in selectedFacets) {
+      out[groupId] = selectedFacets[groupId].filter(facet => {
+        if(!facetLists[groupId] || facetLists[groupId].length == 0) {
+          return false
+        }
 
-    Object.keys(selectedFacets).forEach(selectedFacetGroup => {
-      if(selectedFacetGroup == facetGroup?.idName) {
-        return
-      }
-      
-      newSelectedFacets[selectedFacetGroup] = selectedFacets[selectedFacetGroup]
-    })
+        return facetLists[groupId].some(f => f.val == facet.val)
+      })
+    }
+    return out
+  }, [facetLists, selectedFacets])
 
-    setSelectedFacets(newSelectedFacets)
-    onSelection(newSelectedFacets)
-  }
+  const totalPages = currentFacetList.length / facetsPerPage
 
   return (
     <>
@@ -124,26 +115,22 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
           Filter by:
         </label>
 
-        {Object.keys(FacetTypeList).map((facetGroupName) => {
-          const facetGroupIdName = FacetTypeList[facetGroupName]
-
-          const facetGroup : FacetGroup = {
-            name: facetGroupName, 
-            idName: facetGroupIdName 
-          }
+        {Object.keys(facetTypeList).map(facetTypeId => {
+          const facetGroup = facetTypeList[facetTypeId]
+          const result = facetResults.find(res => res.data?.facetGroup.idName == facetGroup.idName)
           
-          const isLoading = loadingFacetGroup?.idName == facetGroup?.idName
-          const isOpened = currentFacetGroup?.idName == facetGroupIdName
+          const isLoading = result?.isFetching ?? true
+          const isOpened = currentFacetGroup?.idName == facetGroup?.idName
 
           return (
-            <FacetGroupButton 
-              key={facetGroup.idName}
+            <FacetGroupButton
+              key={facetGroup?.idName}
               isOpened={isOpened}
-              isLoading={isLoading as boolean}
-              selectedFacetCount={selectedFacets[facetGroupIdName] ? selectedFacets[facetGroupIdName].length : null}
+              isLoading={isLoading}
               facetGroup={facetGroup}
+              selectedFacetCount={0}
               onToggle={() => {
-                if(currentFacetGroup?.idName == facetGroupIdName) {
+                if (currentFacetGroup?.idName == facetGroup.idName) {
                   closeArea()
                   return
                 }
@@ -157,28 +144,27 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
         <div className="p-5 bg-white border-2 border-black mt-5">
           <div className="justify-between flex">
             <div className="flex">
-            {facetList.length > 0 && (
+              {currentFacetList.length > 0 && (
                 <>
-                  <img src="./icons/search.svg" className="inline-block md:w-10" />
+                  <Image src={searchIcon} className="inline-block md:w-10" />
 
-                  <input 
-                    type="text" 
-                    value={search}
-                    className="border-2 border-black w-full md:w-80 ml-2 font-serif italic text-lg p-3 inline-block" 
+                  <input
+                    type="text"
+                    value={filterSearchText}
+                    className="border-2 border-black w-full md:w-80 ml-2 font-serif italic text-lg p-3 inline-block"
                     onChange={event => {
-                      setSearch(event.target.value)
+                      setFilterSearchText(event.target.value)
                       setPage(1)
                     }}
                   />
                   <div className="ml-5"></div>
                 </>
               )}
-                
-              <button 
-                className="text-2xl border-2 border-black p-2" 
+
+              <button
+                className="text-2xl border-2 border-black p-2"
                 onClick={event => {
                   event.preventDefault()
-                  clearFacetSelection(currentFacetGroup as FacetGroup)
                 }}>
                 Clear
               </button>
@@ -187,7 +173,7 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
               event.preventDefault()
               closeArea()
             }} className="">
-              <img src="./icons/x.svg" />
+              <Image src={xIcon} />
             </button>
           </div>
           {page > 1 && (
@@ -196,17 +182,17 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
                 event.preventDefault()
                 setPage(page - 1)
               }}>
-                <img src="./icons/up.svg" />
+                <Image src={upIcon} />
               </button>
             </div>
           )}
           <div className="flex flex-wrap mt-5">
-            {facetList.length == 0 && (
+            {currentFacetList.length == 0 && (
               <div className="text-2xl">
                 No filters in this category with this query
               </div>
             )}
-            {currentFilteredList.length == 0 && search != "" && (
+            {currentFilteredList.length == 0 && filterSearchText != "" && (
               <div className="text-2xl">
                 Cannot find anything with that filter search text
               </div>
@@ -216,7 +202,7 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
 
               return (
                 <div className="p-2 flex justify-center" key={facet.val}>
-                  <input 
+                  <input
                     type="checkbox"
                     className={`invisible ${style.searchFacetCheckbox}`}
                     id={`facet_${facet.val}`}
@@ -225,17 +211,17 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
                     onChange={(event) => {
                       let newCurrentSelectedFacets = currentSelectedFacets.filter(selectedFacet => selectedFacet.val != facet.val)
 
-                      if(event.target.checked) {
+                      if (event.target.checked) {
                         newCurrentSelectedFacets.push(facet)
                       }
 
-                      const newSelectedFacets = {...selectedFacets}
+                      const newSelectedFacets = { ...selectedFacets }
 
                       newSelectedFacets[facet.group.idName] = newCurrentSelectedFacets
 
                       setSelectedFacets(newSelectedFacets)
 
-                      onSelection(newSelectedFacets)
+                      onSelection(facetsThatCanBeSelected)
                     }}
                   />
 
@@ -252,7 +238,7 @@ export default function FacetArea ({ facetsPerPage, query, onSelection, onOpen }
                 event.preventDefault()
                 setPage(page + 1)
               }}>
-                <img src="./icons/down.svg" />
+                <Image src={downIcon} />
               </button>
             </div>
           )}

@@ -1,30 +1,31 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Facet, FacetSearchResult, FacetSearchResultPretty, FetchFacets, FetchFacetsPretty } from '../../utils/Archive'
+import { CategoryQuery, convertFacetResultToPretty, Facet, FacetSearchResult, FacetSearchResultPretty, fetchFacets, fetchFacetsPretty } from '../../utils/Archive'
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse< FacetSearchResultPretty | boolean>
+    res: NextApiResponse< FacetSearchResultPretty | null>
   ) {
     const facet = req.query.facet as string
     const any = req.query.any as string
 
-    const facets = await FetchFacetsPretty({
-        any,
-        facet,
-    })
-
-    if(!facets) {
-        return false
+    const query: CategoryQuery = {
+        any: any,
+        facet: facet
     }
 
-    let output : boolean | FacetSearchResultPretty = false
+    const results = await fetchFacetsPretty(query)
 
-    if(facets) {
+    if(!results) {
+        return null
+    }
+
+    let output : FacetSearchResultPretty | null = null
+
+    if(results) {
         output = {
-            ...(facets as FacetSearchResultPretty)
+            ...(results as FacetSearchResultPretty)
         }
     }
 
-    res.setHeader('Cache-Control', 's-maxage=300');
     res.status(200).json(output)
 }

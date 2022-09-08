@@ -2,10 +2,11 @@ import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import Search from '../components/Search/Search'
-import { Facet, FacetSearchResultPretty, FacetTypeList, FetchAllFacetsPretty, FetchDataWithQuery, FetchFacets, GetFacetProperNameWithId, Query, Result, SelectedFacets } from '../utils/Archive'
+import { Facet, SearchQuery, FacetGroupsAndFacets, facetTypeList } from '../utils/Archive'
+import Config from '../utils/Config'
 
 interface HomeProps {
-  initialQuery: Query
+  initialQuery: SearchQuery
 }
 
 const Home: NextPage<HomeProps> = ({initialQuery}: HomeProps) => {
@@ -24,10 +25,10 @@ export default Home
 
 export const getServerSideProps : GetServerSideProps<HomeProps> = async (context) => {
   const any = context.query.any as string || ""
-  const rows = parseInt(context.query.rows as string) || 50
+  const rows = parseInt(context.query.rows as string) || Config.defaultRows
   const page = parseInt(context.query.page as string) || 1
 
-  const newSelectedFacets : SelectedFacets = {}
+  const newSelectedFacets : FacetGroupsAndFacets = {}
   for(let queryName in context.query) {
     if(queryName.startsWith("facet:")) {
       const facetGroupIdName = queryName.replace(/^facet\:/, "")
@@ -43,10 +44,7 @@ export const getServerSideProps : GetServerSideProps<HomeProps> = async (context
 
       const facets : Facet[] = value.map(facet => {
         return {
-          group: {
-            idName: facetGroupIdName,
-            name: GetFacetProperNameWithId(facetGroupIdName)
-          },
+          group: facetTypeList[facetGroupIdName],
           val: facet
         }
       })
@@ -57,15 +55,6 @@ export const getServerSideProps : GetServerSideProps<HomeProps> = async (context
     }
   }
 
-  const initialResult = await FetchDataWithQuery({
-    query: {
-      any,
-      facets: newSelectedFacets
-    },
-    rows,
-    page
-  })
-
   return {
     props: {
       initialQuery: {
@@ -75,8 +64,7 @@ export const getServerSideProps : GetServerSideProps<HomeProps> = async (context
         },
         rows,
         page,
-      },
-      initialResult: initialResult as Result,
+      }
     }
   }
 }
