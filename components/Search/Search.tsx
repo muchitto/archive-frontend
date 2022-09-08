@@ -28,12 +28,13 @@ export default function Search({ initialQuery }: SearchProps) {
   const [query, setQuery] = useState(initialQuery)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
   const [isFacetAreaOpen, setIsFacetAreaOpen] = useState(false)
-  const router = useRouter()
-  const debounceSearchText = useDebounce(query.query.any, Config.defaultSearchDebounceTime)
   const [firstLoad, setFirstLoad] = useState(false)
   const [facetSelections, setFacetSelections] = useState(initialQuery.query.facets || {})
+  const debounceSearchText = useDebounce(query.query.any, Config.defaultSearchDebounceTime)
 
-  const { isFetching, error, data, refetch } = useQuery(["runSearch", query.page, query.rows, debounceSearchText, facetSelections], () => {
+  const router = useRouter()
+
+  const { isFetching, data } = useQuery(["runSearch", query.page, query.rows, debounceSearchText, facetSelections], () => {
     if(!query.query.any) {
       return null
     }
@@ -75,8 +76,8 @@ export default function Search({ initialQuery }: SearchProps) {
   const updateUrl = () => {
     const facetList: { [key: string]: string[] } = {}
 
-    for (let facetGroup in query.query.facets) {
-      facetList["facet:" + facetGroup] = query.query.facets[facetGroup].map((facet) => facet.val + "")
+    for (let facetGroup in facetSelections) {
+      facetList["facet:" + facetGroup] = facetSelections[facetGroup].map((facet) => facet.val + "")
     }
 
     router.push({
@@ -98,10 +99,14 @@ export default function Search({ initialQuery }: SearchProps) {
     })
   }, [])
 
+  useEffect(() => {
+    updateUrl()
+  }, [facetSelections])
+
   let currentStatusText = ""
 
-  if(!isFetching) {
-    if(data && data.response.docs.length == 0) {
+  if(!isFetching && !data?.response.docs.length) {
+    if(data) {
       currentStatusText = "No results found with these search terms"
     } else if (!firstLoad) {
       currentStatusText = "Start by typing something in the text"
@@ -147,9 +152,6 @@ export default function Search({ initialQuery }: SearchProps) {
           query={query} 
           facetsPerPage={50} 
           onSelection={setFacetSelections}
-          onOpen={() => {
-
-          }}
         />
       )}
 

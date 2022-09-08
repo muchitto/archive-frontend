@@ -18,7 +18,7 @@ interface FacetAreaProps {
   facetsPerPage: number
   query: SearchQuery
   onSelection: (selectedFacets: FacetGroupsAndFacets) => void
-  onOpen: (open: boolean) => void
+  onOpen?: (open: boolean) => void
 }
 
 export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }: FacetAreaProps) {
@@ -45,7 +45,7 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
             }))
         },
         retry: true,
-        retryDelay: 1000
+        retryDelay: 2000,
       }
     })
   })
@@ -67,30 +67,8 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
       return []
     }
 
-    return facetLists[currentFacetGroup.idName]
+    return facetLists[currentFacetGroup.idName] ?? []
   }, [currentFacetGroup, facetLists])
-
-  const currentFilteredList = useMemo(() => {
-    const searchFilteredList = currentFacetList.filter(facet => (facet.val + "").toLowerCase().includes(filterSearchText.toLowerCase()))
-
-    return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage)
-  }, [currentFacetList, filterSearchText, page, facetsPerPage])
-
-  useEffect(() => {
-    closeArea()
-  }, [debouncedSearchText])
-
-  const closeArea = () => {
-    setIsOpen(false)
-    setFilterSearchText("")
-    setCurrentFacetGroup(null)
-    onOpen(false)
-  }
-
-  const openArea = async (facetGroup: FacetGroup) => {
-    setIsOpen(true)
-    onOpen(true)
-  }
 
   const facetsThatCanBeSelected = useMemo(() => {
     const out : FacetGroupsAndFacets = {}
@@ -106,6 +84,42 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
     return out
   }, [facetLists, selectedFacets])
 
+  const currentFilteredList = useMemo(() => {
+    const searchFilteredList = currentFacetList.filter(facet => (facet.val + "").toLowerCase().includes(filterSearchText.toLowerCase()))
+
+    return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage)
+  }, [currentFacetList, filterSearchText, page, facetsPerPage])
+
+  useEffect(() => {
+    closeArea()
+  }, [debouncedSearchText])
+
+  const closeArea = () => {
+    setIsOpen(false)
+    setFilterSearchText("")
+    setCurrentFacetGroup(null)
+    
+    if(onOpen) {
+      onOpen(false)
+    }
+  }
+
+  const openArea = async (facetGroup: FacetGroup) => {
+    setIsOpen(true)
+    
+    if(onOpen) {
+      onOpen(true)
+    }
+  }
+
+  const clearSelection = (facetGroup: FacetGroup) => {
+    const newSelectedFacets = {
+      ...selectedFacets
+    }
+    newSelectedFacets[facetGroup.idName] = []
+    setSelectedFacets(newSelectedFacets)
+  }
+
   const totalPages = currentFacetList.length / facetsPerPage
 
   return (
@@ -118,9 +132,13 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
         {Object.keys(facetTypeList).map(facetTypeId => {
           const facetGroup = facetTypeList[facetTypeId]
           const result = facetResults.find(res => res.data?.facetGroup.idName == facetGroup.idName)
-          
+
           const isLoading = result?.isFetching ?? true
           const isOpened = currentFacetGroup?.idName == facetGroup?.idName
+          const isError = result?.isError ?? false
+          
+          const selectedFacetCount = facetsThatCanBeSelected[facetGroup.idName]?.length ?? 0
+          const totalFacetCount = facetLists[facetGroup.idName]?.length ?? 0
 
           return (
             <FacetGroupButton
@@ -128,7 +146,10 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
               isOpened={isOpened}
               isLoading={isLoading}
               facetGroup={facetGroup}
-              selectedFacetCount={0}
+              isError={isError}
+              totalFacetCount={totalFacetCount}
+              selectedFacetCount={selectedFacetCount}
+              
               onToggle={() => {
                 if (currentFacetGroup?.idName == facetGroup.idName) {
                   closeArea()
@@ -165,6 +186,10 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
                 className="text-2xl border-2 border-black p-2"
                 onClick={event => {
                   event.preventDefault()
+
+                  if(currentFacetGroup) {
+                    clearSelection(currentFacetGroup)
+                  }
                 }}>
                 Clear
               </button>

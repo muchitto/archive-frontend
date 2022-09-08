@@ -7,7 +7,7 @@ module.exports = {
   theme: {
     extend: {
       boxShadow: {
-        "btn": '4px 4px 0px 0px rgba(0, 0, 0, 0.95)'
+        "btn": '2px 2px 0px 0px rgba(0, 0, 0, 0.95)'
       }
     },
   },
