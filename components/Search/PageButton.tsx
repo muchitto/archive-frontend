@@ -5,22 +5,22 @@ interface PageButtonProps {
   textBottom: string
   showText: boolean
   className?: string
-  iconPath: string
+  icon: JSX.Element
   onClick: (event: MouseEvent<HTMLAnchorElement>) => void
 }
 
-export default function PageButton({ textTop, textBottom, className, showText, iconPath, onClick }: PageButtonProps) {
+export default function PageButton({ textTop, textBottom, className, showText, icon, onClick }: PageButtonProps) {
   return (
-    <div className={`${className} text-center text-lg}`}>
+    <div className={`${className} text-center text-lg`}>
       <label className={`pb-2 block animate-pulse ${!showText ? 'block' : 'invisible'}`}>
         {textTop}
       </label>
-      <div className="rounded-full bg-white w-14 h-14 block border-2 border-black">
+      <div className="rounded-full bg-white w-14 h-14 block border-2 border-black hover:shadow-btn">
         <a href="#" onClick={(event) => {
           event.preventDefault()
           onClick(event)
         }}>
-          <img src={iconPath} className="w-full" />
+          {icon}
         </a>
       </div>
       <label className={`pt-2 block animate-pulse ${!showText ? 'block' : 'invisible'}`}>

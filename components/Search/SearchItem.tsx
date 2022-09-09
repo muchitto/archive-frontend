@@ -1,3 +1,4 @@
+import Image from "next/future/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { Doc } from "../../utils/Archive";
@@ -19,21 +20,15 @@ export default function ResultItem({ doc }: SearchItemProps) {
 
   return (
     <a href={`https://archive.org/details/${doc.identifier}`} className="cursor-pointer">
-      <div className="border-2 border-rose-200 flex justify-between flex-col lg:max-w-xs mb-5 lg:mb-0">
-        <div className="w-full h-full">
-          <img src={imageURL} className="w-full" />
+      <div className="border-2 border-amber-300 p-5 flex justify-between flex-col mb-5 lg:mb-0 h-full w-full">
+        <div className="w-full h-ful">
+          <Image src={imageURL} width="100" height="100" className="w-full" />
         </div>
         <div className="flex flex-col p-2 w-full">
           <div className="text-lg text-center p-2 w-full">
             {doc.title}
           </div>
           <div className="flex">
-            {MediaTypeIcons[doc.mediatype] && (
-              <img 
-                src={"./icons/" + MediaTypeIcons[doc.mediatype]}
-                className="w-6 max-h-80"
-              />
-            )}
             <label className="ml-2 w-full">
               {doc.mediatype}
             </label>

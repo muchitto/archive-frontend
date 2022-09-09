@@ -2,98 +2,84 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import style from "./Search.module.scss"
 import { stringify, parse } from "query-string"
 
-import { debounce, throttle } from 'lodash'
-import { SelectedFacets, FetchDataWithQuery, Doc, MediaType, AllMediaTypes, Query, QueryDetail, Result, FacetType, FacetTypeList, FetchFacets, FacetSearchResult, Facet } from "../../utils/Archive"
+import Image from "next/future/image"
+import { debounce, first, throttle, update } from 'lodash'
+import { SearchQuery, fetchDataWithQuery } from "../../utils/Archive"
 import ResultItem from "./SearchItem"
 import SearchResults from "./SearchResults"
 import { useRouter } from "next/router"
 import FacetArea from "./Facet/FacetArea"
 import PageButton from "./PageButton"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
+import { atom, useAtom } from "jotai"
+import qs from "qs"
+import { useDebounce, useRunOnce } from "../../utils/hooks"
+import Config from "../../utils/Config"
+
+import refreshCWIcon from "../../assets/icons/refresh-cw.svg"
+import leftIcon from "../../assets/icons/left.svg"
+import rightIcon from "../../assets/icons/right.svg"
 
 interface SearchProps {
-  initialQuery: Query
+  initialQuery: SearchQuery
+}
+
+enum PageDirection {
+  Previous,
+  Next
 }
 
 export default function Search({ initialQuery }: SearchProps) {
-  const [isSearching, setIsSearching] = useState(false)
   const [query, setQuery] = useState(initialQuery)
-  const [result, setResult] = useState({} as Result)
-  const [badSearch, setBadSearch] = useState(false)
-  const [selectedFacets, setSelectedFacets] = useState(initialQuery.query.facets)
-  const [initialized, setInitialized] = useState(false)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
   const [isFacetAreaOpen, setIsFacetAreaOpen] = useState(false)
+  const [facetSelections, setFacetSelections] = useState(initialQuery.query.facets || {})
+  const [pageButtonClicked, setPageButtonClicked] = useState<PageDirection | null>(null)
+  const debounceSearchText = useDebounce(query.query.any, Config.defaultSearchDebounceTime)
 
   const router = useRouter()
 
-  const haveMoreResults = result?.response?.numFound / query.rows > query.page
-  const haveResults = result?.response?.docs.length > 0
+  const { isFetching, data } = useQuery(["runSearch", query.page, query.rows, debounceSearchText, facetSelections], () => {
+    if(!debounceSearchText) {
+      return null
+    }
 
-  const runSearchDebounced = useCallback(debounce((query: Query) => {
-    runSearch(query)
-  }, 1000), [isSearching])
-
-  const runSearch = (query: Query) => {
-    setIsSearching(true)
-
-    FetchDataWithQuery(query).then((data) => {
-      setIsSearching(false)
-
-      setInitialized(true)
-
-      if (data) {
-        updateUrl(query)
-        setResult(data as Result)
-        setBadSearch(false)
-        return
-      }
-
-      setBadSearch(true)
-
-    }).catch((error) => {
-      console.log(error)
+    return fetchDataWithQuery({
+      query: {
+        any: debounceSearchText,
+        facets: facetSelections
+      },
+      rows: query.rows,
+      page: query.page,
     })
-  }
+  })
 
-  const updateQueryAndSearch = async (query: Query, debounced: boolean) => {
-    setQuery(query)
-
-    if(debounced) {
-      runSearchDebounced(query)
-    } else {
-      runSearch(query)
-    }
-
-    if(!isFacetAreaOpen) {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      })
-    }
-  }
+  const haveMoreResults = (data) ? data?.response?.numFound / query.rows > query.page : false
+  const haveResults = (data) ? data?.response?.docs.length > 0 : false
 
   const nextPage = () => {
     setUsedPageButtons(true)
-    updateQueryAndSearch({
+    setQuery({
       ...query,
       page: query.page + 1
-    }, false)
+    })
+    setPageButtonClicked(PageDirection.Previous)
   }
 
   const prevPage = () => {
     setUsedPageButtons(true)
-
-    updateQueryAndSearch({
+    setQuery({
       ...query,
       page: query.page - 1
-    }, false)
+    })
+    setPageButtonClicked(PageDirection.Next)
   }
 
-  const updateUrl = (query: Query) => {
-    const facetList : { [key:string]: string[] } = {}
-    
-    for(let facetGroup in query.query.facets) {
-      facetList["facet:" + facetGroup] = query.query.facets[facetGroup].map((facet) => facet.val + "")
+  const updateUrl = () => {
+    const facetList: { [key: string]: string[] } = {}
+
+    for (let facetGroup in facetSelections) {
+      facetList["facet:" + facetGroup] = facetSelections[facetGroup].map((facet) => facet.val + "")
     }
 
     router.push({
@@ -106,109 +92,115 @@ export default function Search({ initialQuery }: SearchProps) {
     }, undefined, {
       shallow: true,
     })
-    
   }
 
-  useEffect(() => {
+  useRunOnce(() => {
     router.beforePopState((state) => {
-      location.reload()
+      router.reload()
       return true
     })
+  })
 
-    if(query.query.any) {
-      runSearch(query)
+  useEffect(() => {
+    setQuery({
+      ...query,
+      query: {
+        ...query.query,
+        facets: facetSelections 
+      }
+    })
+  }, [facetSelections])
+
+  useEffect(() => {
+    updateUrl()
+  }, [facetSelections, query])
+
+  useEffect(() => {
+    if(pageButtonClicked != null) {
+      setPageButtonClicked(null)
     }
-  }, [])
+  }, [pageButtonClicked])
 
-  return ( 
+  let currentStatusText = ""
+  if(!isFetching) {
+    if (debounceSearchText.length == 0) {
+      currentStatusText = "Start by typing something in the textfield"
+    } else if(data && !data?.response.docs.length) {
+      currentStatusText = "No results found with these search terms"
+    }
+  }
+
+  return (
     <div>
-      {isSearching && isFacetAreaOpen && (
+      {isFetching && isFacetAreaOpen && (
         <div className="fixed top-5 right-5">
-          <img src="./icons/loading.svg" className="animate-reverse-spin w-8" />
+          <Image src={refreshCWIcon} className="animate-spin w-8" alt="Loading..." />
         </div>
       )}
       <form onSubmit={(event) => {
         event.preventDefault()
-
-        runSearch(query)
       }}>
         <input
           type="text"
-          value={query.query.any}
-          className="border-2 border-black w-full p-3 font-serif italic text-2xl"
+          defaultValue={query.query.any}
+          className="border-2 border-black w-full p-3 font-serif italic text-2xl focus:shadow-btn"
 
           onChange={(event) => {
             const value = event.target.value
-            updateQueryAndSearch({
+            setQuery({
               ...query,
               query: {
                 ...query.query,
                 any: value
-              }
-            }, true)
+              },
+              page: 1
+            })
           }}
 
           onKeyDown={(event) => {
-            if(event.key == "Enter") {
+            if (event.key == "Enter") {
               event.preventDefault()
-              runSearch(query)
             }
           }}
         />
-
-        {(result?.response?.docs.length > 0 || selectedFacets) && initialized && (
-          <FacetArea
-            query={query}
-            facetsPerPage={50}
-            onOpen={(open) => {
-              setIsFacetAreaOpen(open)
-            }}
-            onSelection={(selectedFacets: SelectedFacets) => {
-              setSelectedFacets(selectedFacets)
-
-              updateQueryAndSearch({
-                ...query,
-                query: {
-                  any: query.query.any,
-                  facets: selectedFacets
-                },
-                page: 1
-              }, false)
-            }}
-          />
-        )}
       </form>
+      {(data || isFacetAreaOpen) && (
+        <FacetArea 
+          query={query} 
+          facetsPerPage={50} 
+          onSelection={setFacetSelections}
+          onOpen={(isOpen) => {
+            setIsFacetAreaOpen(isOpen)
+          }}
+        />
+      )}
+
       <div className="py-5">
-        {isSearching ? (
+        {isFetching && (
           <div className="text-2xl font-bold uppercase p-5 flex justify-center">
-            <img src="./icons/loading.svg" className="animate-reverse-spin" />
-          </div>) : (
-          (!badSearch && result.response?.docs.length > 0) ?
-            <SearchResults query={query} result={result} />
-            : (
-              <div className="text-3xl uppercase font-bold">
-                {initialized && (
-                  <>
-                    No results found
-                  </>
-                )}
-                {!initialized && (
-                  <>
-                    Start by typing in a search text
-                  </>
-                )}
-              </div>
-            )
+            <Image src={refreshCWIcon} className="animate-spin" width="100" height="100" alt="Loading..." />
+          </div>
+        )}
+        {currentStatusText && (
+          <div className="text-3xl uppercase font-bold">
+            {currentStatusText}
+          </div>
+        )}
+        {!isFetching && data && data.response.docs.length > 0 && (
+          <SearchResults page={query.page} rows={query.rows} result={data}/>
         )}
       </div>
+      
       {query.page > 1 && haveResults && (
         <PageButton
           className="fixed inset-y-1/2 left-4"
           textTop="Prev"
           textBottom="Page"
           showText={usedPageButtons}
-          iconPath={"./icons/left.svg"}
-          onClick={(event) => {
+          icon={(
+            <Image src={leftIcon} alt="Previous page" />
+          )}
+          onClick={() => {
             prevPage()
           }}
         />
@@ -219,7 +211,9 @@ export default function Search({ initialQuery }: SearchProps) {
           textTop="Next"
           textBottom="Page"
           showText={usedPageButtons}
-          iconPath={"./icons/right.svg"}
+          icon={(
+            <Image src={rightIcon} alt="Next page" />
+          )}
           onClick={(event) => {
             nextPage()
           }}

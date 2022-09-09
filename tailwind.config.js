@@ -6,16 +6,9 @@ module.exports = {
   ],
   theme: {
     extend: {
-      animation: {
-        'reverse-spin': 'reverse-spin 1s linear infinite'
-      },
-      keyframes: {
-        'reverse-spin': {
-          from: {
-            transform: 'rotate(360deg)'
-          },
-        }
-      },
+      boxShadow: {
+        "btn": '2px 2px 0px 0px rgba(0, 0, 0, 0.95)'
+      }
     },
   },
   plugins: [],
