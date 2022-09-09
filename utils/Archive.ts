@@ -73,13 +73,13 @@ export interface SearchQuery {
   output?: "json" | "xml"
 }
 
-export type FacetGroupsAndFacets = { 
+export type FacetGroupSelections = { 
   [key: string] : Facet[] 
 }
 
 export interface SearchQueryDetail {
   any: string
-  facets: FacetGroupsAndFacets
+  facets: FacetGroupSelections
 }
 
 export interface CategoryQuery {
