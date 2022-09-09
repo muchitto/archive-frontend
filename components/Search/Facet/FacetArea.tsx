@@ -116,7 +116,8 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
 
   const openArea = async (facetGroup: FacetGroup) => {
     setIsOpen(true)
-    
+    setPage(1)
+
     if(onOpen) {
       onOpen(true)
     }
