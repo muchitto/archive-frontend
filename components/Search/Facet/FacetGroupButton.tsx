@@ -27,6 +27,8 @@ export default function FacetGroupButton({ facetGroup, className, totalFacetCoun
     className
   ]
 
+  const isDisabled = isLoading || totalFacetCount == 0
+
   if(!isLoading && totalFacetCount == 0) {
     classes.push("border-dashed")
   } else if(isError) {
@@ -38,7 +40,7 @@ export default function FacetGroupButton({ facetGroup, className, totalFacetCoun
   return (
     <button
       key={facetGroup.idName}
-      disabled={isLoading || totalFacetCount == 0}
+      disabled={isDisabled}
       className={classes.join(" ")}
       onClick={async (event) => {
         event.preventDefault()
@@ -47,7 +49,7 @@ export default function FacetGroupButton({ facetGroup, className, totalFacetCoun
       <label className="cursor-pointer">
         {facetGroup.name}
       </label>
-      {selectedFacetCount > 0 && (
+      {selectedFacetCount > 0 && !isDisabled && (
         <span className="mx-2 font-bold non-italic font-sans">
           ({selectedFacetCount})
         </span>
