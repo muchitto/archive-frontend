@@ -166,9 +166,18 @@ export default function Search({ initialQuery }: SearchProps) {
       </form>
       {(data || isFacetAreaOpen) && (
         <FacetArea 
-          query={query} 
+          searchText={debounceSearchText} 
           facetsPerPage={50} 
-          onSelection={setFacetSelections}
+          selectedFacets={facetSelections}
+          onSelection={(facetGroup, facets) => {
+            const newFacetSelections = {
+              ...facetSelections
+            }
+
+            newFacetSelections[facetGroup.idName] = facets
+
+            setFacetSelections(newFacetSelections)
+          }}
           onOpen={(isOpen) => {
             setIsFacetAreaOpen(isOpen)
           }}
