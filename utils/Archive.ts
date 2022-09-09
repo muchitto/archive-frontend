@@ -146,6 +146,12 @@ export function queryDetailFormatter(data: SearchQueryDetail) {
   let q = `(${data.any})`
 
   for(let key in data.facets) {
+    const facetList = data.facets[key]
+
+    if(facetList.length == 0) {
+      continue
+    }
+
     if(q.length > 0) {
       q += " AND "
     }
@@ -244,7 +250,7 @@ export async function fetchDataWithQuery(query: SearchQuery): Promise<SearchResu
   if(query.query) {
     urlPrefix += `&q=${queryDetailFormatter(query.query)}`
   }
-  
+
   const data = await fetch(urlPrefix)
 
   return await data.json()

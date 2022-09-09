@@ -73,6 +73,11 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
   const facetsThatCanBeSelected = useMemo(() => {
     const out : FacetGroupsAndFacets = {}
     for(let groupId in selectedFacets) {
+      if(!facetLists[groupId] || facetLists[groupId].length == 0) {
+        out[groupId] = selectedFacets[groupId]
+        continue
+      }
+
       out[groupId] = selectedFacets[groupId].filter(facet => {
         if(!facetLists[groupId] || facetLists[groupId].length == 0) {
           return false
@@ -121,6 +126,10 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
   }
 
   const totalPages = currentFacetList.length / facetsPerPage
+
+  useEffect(() => {
+    onSelection(facetsThatCanBeSelected)
+  }, [selectedFacets])
 
   return (
     <>
@@ -245,8 +254,6 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
                       newSelectedFacets[facet.group.idName] = newCurrentSelectedFacets
 
                       setSelectedFacets(newSelectedFacets)
-
-                      onSelection(facetsThatCanBeSelected)
                     }}
                   />
 

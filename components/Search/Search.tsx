@@ -10,7 +10,7 @@ import SearchResults from "./SearchResults"
 import { useRouter } from "next/router"
 import FacetArea from "./Facet/FacetArea"
 import PageButton from "./PageButton"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { atom, useAtom } from "jotai"
 import qs from "qs"
 import useDebounce from "../../utils/useDebounce"
@@ -24,34 +24,34 @@ interface SearchProps {
   initialQuery: SearchQuery
 }
 
+enum PageDirection {
+  Previous,
+  Next
+}
+
 export default function Search({ initialQuery }: SearchProps) {
   const [query, setQuery] = useState(initialQuery)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
   const [isFacetAreaOpen, setIsFacetAreaOpen] = useState(false)
-  const [firstLoad, setFirstLoad] = useState(false)
   const [facetSelections, setFacetSelections] = useState(initialQuery.query.facets || {})
+  const [pageButtonClicked, setPageButtonClicked] = useState<PageDirection | null>(null)
   const debounceSearchText = useDebounce(query.query.any, Config.defaultSearchDebounceTime)
 
   const router = useRouter()
 
-  const { isFetching, data } = useQuery(["runSearch", query.page, query.rows, debounceSearchText, facetSelections], () => {
-    if(!query.query.any) {
+  const { isLoading, isFetching, data } = useQuery(["runSearch", query.page, query.rows, debounceSearchText, facetSelections], () => {
+    if(!debounceSearchText) {
       return null
     }
 
     return fetchDataWithQuery({
       query: {
-        any: query.query.any,
-        facets: {}
+        any: debounceSearchText,
+        facets: facetSelections
       },
       rows: query.rows,
       page: query.page,
     })
-  }, {
-    onSuccess: (result) => {
-      setFirstLoad(true)  
-      updateUrl()
-    }
   })
 
   const haveMoreResults = (data) ? data?.response?.numFound / query.rows > query.page : false
@@ -63,6 +63,7 @@ export default function Search({ initialQuery }: SearchProps) {
       ...query,
       page: query.page + 1
     })
+    setPageButtonClicked(PageDirection.Previous)
   }
 
   const prevPage = () => {
@@ -71,6 +72,7 @@ export default function Search({ initialQuery }: SearchProps) {
       ...query,
       page: query.page - 1
     })
+    setPageButtonClicked(PageDirection.Next)
   }
 
   const updateUrl = () => {
@@ -100,16 +102,31 @@ export default function Search({ initialQuery }: SearchProps) {
   }, [])
 
   useEffect(() => {
-    updateUrl()
+    setQuery({
+      ...query,
+      query: {
+        ...query.query,
+        facets: facetSelections 
+      }
+    })
   }, [facetSelections])
 
-  let currentStatusText = ""
+  useEffect(() => {
+    updateUrl()
+  }, [facetSelections, query])
 
-  if(!isFetching && !data?.response.docs.length) {
-    if(data) {
+  useEffect(() => {
+    if(pageButtonClicked != null) {
+      setPageButtonClicked(null)
+    }
+  }, [pageButtonClicked])
+
+  let currentStatusText = ""
+  if(!isFetching) {
+    if (debounceSearchText.length == 0) {
+      currentStatusText = "Start by typing something in the textfield"
+    } else if(data && !data?.response.docs.length) {
       currentStatusText = "No results found with these search terms"
-    } else if (!firstLoad) {
-      currentStatusText = "Start by typing something in the text"
     }
   }
 
@@ -117,7 +134,7 @@ export default function Search({ initialQuery }: SearchProps) {
     <div>
       {isFetching && isFacetAreaOpen && (
         <div className="fixed top-5 right-5">
-          <Image src={refreshCWIcon} className="animate-spin w-8" />
+          <Image src={refreshCWIcon} className="animate-spin w-8" alt="Loading..." />
         </div>
       )}
       <form onSubmit={(event) => {
@@ -147,18 +164,21 @@ export default function Search({ initialQuery }: SearchProps) {
           }}
         />
       </form>
-      {query.query.any && (
+      {(data || isFacetAreaOpen) && (
         <FacetArea 
           query={query} 
           facetsPerPage={50} 
           onSelection={setFacetSelections}
+          onOpen={(isOpen) => {
+            setIsFacetAreaOpen(isOpen)
+          }}
         />
       )}
 
       <div className="py-5">
         {isFetching && (
           <div className="text-2xl font-bold uppercase p-5 flex justify-center">
-            <Image src={refreshCWIcon} className="animate-spin" />
+            <Image src={refreshCWIcon} className="animate-spin" width="100" height="100" alt="Loading..." />
           </div>
         )}
         {currentStatusText && (
@@ -178,9 +198,9 @@ export default function Search({ initialQuery }: SearchProps) {
           textBottom="Page"
           showText={usedPageButtons}
           icon={(
-            <Image src={leftIcon} />
+            <Image src={leftIcon} alt="Previous page" />
           )}
-          onClick={(event) => {
+          onClick={() => {
             prevPage()
           }}
         />
@@ -192,7 +212,7 @@ export default function Search({ initialQuery }: SearchProps) {
           textBottom="Page"
           showText={usedPageButtons}
           icon={(
-            <Image src={rightIcon} />
+            <Image src={rightIcon} alt="Next page" />
           )}
           onClick={(event) => {
             nextPage()
