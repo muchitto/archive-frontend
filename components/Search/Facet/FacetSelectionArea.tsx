@@ -8,6 +8,11 @@ import upIcon from "../../../assets/icons/up.svg"
 import downIcon from "../../../assets/icons/down.svg"
 import style from "../Search.module.scss"
 import { useDebounce, useThrottle } from "../../../utils/hooks"
+import * as Checkbox from "@radix-ui/react-checkbox"
+import * as Label from '@radix-ui/react-label'
+
+import checkSquareIcon from "../../../assets/icons/check-square.svg"
+import squareIcon from "../../../assets/icons/square.svg"
 
 interface FacetSelectionAreaProps {
   facets: Facet[]
@@ -22,26 +27,30 @@ interface FacetSelectionAreaProps {
 interface FacetSelectionCheckProps {
   facet: Facet
   isSelected: boolean,
+  className?: string
   onSelection: (isChecked: boolean) => void
 }
 
-export function FacetSelectionCheck ({ facet, isSelected, onSelection } : FacetSelectionCheckProps) {
+export function FacetSelectionCheck ({ facet, className, isSelected, onSelection } : FacetSelectionCheckProps) {
   const facetId = "facet_" + facet.val
 
   return (
-    <div className="p-2 inline-block justify-center min-w-fit" key={facet.val}>
-      <input
-        type="checkbox"
-        className={`absolute invisible ${style.searchFacetCheckbox}`}
-        id={facetId}
-        value={facet.val}
-        checked={isSelected}
-        onChange={event => onSelection(event.target.checked)}
-      />
-      <label className="italic text-lg tracking-wide flex" htmlFor={facetId}>
-        <span className="ml-2">{facet.val}</span>
-      </label>
-    </div>
+    <Checkbox.Root 
+      checked={isSelected} 
+      onCheckedChange={onSelection} 
+      className={`flex content-center min-w-fit ${className} hover:underline p-1`}>
+      <Checkbox.Indicator forceMount={true} className="inline-block">
+        <Image 
+          src={isSelected ? checkSquareIcon : squareIcon} 
+          alt={"Facet checkbox"} 
+          width="30"
+          height="30"
+        />
+      </Checkbox.Indicator>
+      <Label.Root className="inline-block mt-1 ml-1 text-lg">
+        {facet.val}
+      </Label.Root>
+    </Checkbox.Root>
   )
 }
 
@@ -53,9 +62,6 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
   const currentFilteredList = useMemo(() => {
     const searchFilteredList = facets.filter(facet => {
       return (facet.val + "").toLowerCase().trim().includes(throttledFilterSearchText.trim().toLowerCase())
-    })
-    .filter(facet => {
-      return !selectedFacets.some(f => f.val == facet.val)
     })
 
     return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage)
@@ -112,10 +118,11 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
       </div>
 
       {selectedFacets.length > 0 && (
-        <div className="flex flex-wrap mt-5 border-2 border-black p-2">
+        <div className="flex flex-wrap mt-5 border-b-2 border-black p-2">
           {selectedFacets.map(facet => {
             return (
               <FacetSelectionCheck 
+                className="mr-2 mb-2"
                 key={facet.val}
                 facet={facet}
                 isSelected={true} 
@@ -126,10 +133,10 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
             )
           })}
         </div>
-      )}
 
+      )}
       {page > 1 && (
-        <div className="flex justify-center mt-5 animate-bounce">
+        <div className="flex justify-center mt-8 animate-bounce">
           <button onClick={event => {
             event.preventDefault()
             setPage(page - 1)
@@ -150,9 +157,14 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
           </div>
         )}
         {currentFilteredList.map((facet) => {
+          if(selectedFacets.includes(facet)) {
+            return <></>
+          }
+
           return (
-            <FacetSelectionCheck 
-              key={facet.val}
+            <FacetSelectionCheck
+              className="mr-2 mb-2"
+              key={facet.val} 
               facet={facet}
               isSelected={false} 
               onSelection={(isChecked) => {
