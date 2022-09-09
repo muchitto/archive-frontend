@@ -4,7 +4,7 @@ import { FacetGroup, FacetSearchResultPretty, SearchQuery, FacetGroupsAndFacets,
 import FacetGroupButton from "./FacetGroupButton"
 import style from "../Search.module.scss"
 import { useQueries, useQuery } from "@tanstack/react-query"
-import useDebounce from "../../../utils/useDebounce"
+import { useDebounce } from "../../../utils/hooks"
 import Config from "../../../utils/Config"
 
 import Image from "next/future/image"
@@ -99,6 +99,11 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
     closeArea()
   }, [debouncedSearchText])
 
+  // Report selection changes that happens
+  useEffect(() => {
+    onSelection(facetsThatCanBeSelected)
+  }, [selectedFacets])
+
   const closeArea = () => {
     setIsOpen(false)
     setFilterSearchText("")
@@ -126,10 +131,6 @@ export default function FacetArea({ facetsPerPage, query, onSelection, onOpen }:
   }
 
   const totalPages = currentFacetList.length / facetsPerPage
-
-  useEffect(() => {
-    onSelection(facetsThatCanBeSelected)
-  }, [selectedFacets])
 
   return (
     <>

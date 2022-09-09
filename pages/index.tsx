@@ -55,8 +55,6 @@ export const getServerSideProps : GetServerSideProps<HomeProps> = async (context
     }
   }
 
-  console.log(newSelectedFacets)
-
   return {
     props: {
       initialQuery: {

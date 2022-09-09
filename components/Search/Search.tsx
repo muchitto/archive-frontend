@@ -13,7 +13,7 @@ import PageButton from "./PageButton"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { atom, useAtom } from "jotai"
 import qs from "qs"
-import useDebounce from "../../utils/useDebounce"
+import { useDebounce, useRunOnce } from "../../utils/hooks"
 import Config from "../../utils/Config"
 
 import refreshCWIcon from "../../assets/icons/refresh-cw.svg"
@@ -39,7 +39,7 @@ export default function Search({ initialQuery }: SearchProps) {
 
   const router = useRouter()
 
-  const { isLoading, isFetching, data } = useQuery(["runSearch", query.page, query.rows, debounceSearchText, facetSelections], () => {
+  const { isFetching, data } = useQuery(["runSearch", query.page, query.rows, debounceSearchText, facetSelections], () => {
     if(!debounceSearchText) {
       return null
     }
@@ -94,12 +94,12 @@ export default function Search({ initialQuery }: SearchProps) {
     })
   }
 
-  useEffect(() => {
+  useRunOnce(() => {
     router.beforePopState((state) => {
       router.reload()
       return true
     })
-  }, [])
+  })
 
   useEffect(() => {
     setQuery({
