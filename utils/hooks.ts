@@ -21,6 +21,27 @@ export function useDebounce<T>(value: T, delay: number) {
   return debouncedValue
 }
 
+export function useThrottle<T>(value: T, delay: number) {
+  const [throttleValue, setThrottleValue] = useState(value)
+  const [shouldWait, setShouldWait] = useState(false)
+
+  useEffect(() => {
+    if(shouldWait) {
+      return
+    }
+
+    setThrottleValue(value)
+
+    setShouldWait(true)
+
+    setTimeout(() => {
+      setShouldWait(false)
+    }, delay)
+  }, [value, delay, shouldWait])
+
+  return throttleValue
+}
+
 export const useRunOnce = (func: () => void) => {
   const init = useRef(false)
   useEffect(() => {

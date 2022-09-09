@@ -1,5 +1,5 @@
 import Image from "next/future/image"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Facet, FacetGroup } from "../../../utils/Archive"
 
 import searchIcon from "../../../assets/icons/search.svg"
@@ -7,6 +7,7 @@ import xIcon from "../../../assets/icons/x.svg"
 import upIcon from "../../../assets/icons/up.svg"
 import downIcon from "../../../assets/icons/down.svg"
 import style from "../Search.module.scss"
+import { useDebounce, useThrottle } from "../../../utils/hooks"
 
 interface FacetSelectionAreaProps {
   facets: Facet[]
@@ -14,18 +15,51 @@ interface FacetSelectionAreaProps {
   isOpen: boolean
   facetsPerPage: number
   selectedFacets: Facet[]
+  onClose: () => void
   onSelection: (facetGroup: FacetGroup, facets: Facet[]) => void
 }
 
-export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, selectedFacets, facets, onSelection }: FacetSelectionAreaProps) {
+interface FacetSelectionCheckProps {
+  facet: Facet
+  isSelected: boolean,
+  onSelection: (isChecked: boolean) => void
+}
+
+export function FacetSelectionCheck ({ facet, isSelected, onSelection } : FacetSelectionCheckProps) {
+  const facetId = "facet_" + facet.val
+
+  return (
+    <div className="p-2 inline-block justify-center min-w-fit" key={facet.val}>
+      <input
+        type="checkbox"
+        className={`absolute invisible ${style.searchFacetCheckbox}`}
+        id={facetId}
+        value={facet.val}
+        checked={isSelected}
+        onChange={event => onSelection(event.target.checked)}
+      />
+      <label className="italic text-lg tracking-wide flex" htmlFor={facetId}>
+        <span className="ml-2">{facet.val}</span>
+      </label>
+    </div>
+  )
+}
+
+export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, selectedFacets, facets, onClose, onSelection }: FacetSelectionAreaProps) {
   const [filterSearchText, setFilterSearchText] = useState("")
   const [page, setPage] = useState(1)
+  const throttledFilterSearchText = useThrottle(filterSearchText, 100)
 
   const currentFilteredList = useMemo(() => {
-    const searchFilteredList = facets.filter(facet => (facet.val + "").toLowerCase().includes(filterSearchText.toLowerCase()))
+    const searchFilteredList = facets.filter(facet => {
+      return (facet.val + "").toLowerCase().trim().includes(throttledFilterSearchText.trim().toLowerCase())
+    })
+    .filter(facet => {
+      return !selectedFacets.some(f => f.val == facet.val)
+    })
 
     return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage)
-  }, [facets, filterSearchText, page, facetsPerPage])
+  }, [facets, throttledFilterSearchText, page, facetsPerPage, selectedFacets])
 
   if (!isOpen) {
     return (<></>)
@@ -70,11 +104,30 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
             event.preventDefault()
             
             setPage(1)
+            onClose()
           }} 
         >
           <Image src={xIcon} alt="Close" />
         </button>
       </div>
+
+      {selectedFacets.length > 0 && (
+        <div className="flex flex-wrap mt-5 border-2 border-black p-2">
+          {selectedFacets.map(facet => {
+            return (
+              <FacetSelectionCheck 
+                key={facet.val}
+                facet={facet}
+                isSelected={true} 
+                onSelection={(isChecked) => {
+                  onSelection(facetGroup, selectedFacets.filter(f => f.val != facet.val))
+                }}
+              />
+            )
+          })}
+        </div>
+      )}
+
       {page > 1 && (
         <div className="flex justify-center mt-5 animate-bounce">
           <button onClick={event => {
@@ -97,28 +150,17 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
           </div>
         )}
         {currentFilteredList.map((facet) => {
-          const facetId = `facet_${facet.val}`
           return (
-            <div className="p-2 flex justify-center" key={facet.val}>
-              <input
-                type="checkbox"
-                className={`invisible ${style.searchFacetCheckbox}`}
-                id={facetId}
-                value={facet.val}
-                checked={(selectedFacets.length > 0) ? selectedFacets.some(selectedFacet => selectedFacet.val == facet.val) : false}
-                onChange={(event) => {
-                  const newFacetSelection = selectedFacets.filter(f => f.val != facet.val)
-                  if(event.target.checked) {
-                    newFacetSelection.push(facet)
-                  }
-                  onSelection(facetGroup, newFacetSelection)
-                }}
-              />
-
-              <label className="italic text-lg tracking-wide flex" htmlFor={facetId}>
-                <span className="ml-2">{facet.val}</span>
-              </label>
-            </div>
+            <FacetSelectionCheck 
+              key={facet.val}
+              facet={facet}
+              isSelected={false} 
+              onSelection={(isChecked) => {
+                const newFacetSelection = [...selectedFacets]
+                newFacetSelection.push(facet)
+                onSelection(facetGroup, newFacetSelection)
+              }}
+            />
           )
         })}
       </div>

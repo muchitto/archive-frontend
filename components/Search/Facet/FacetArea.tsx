@@ -128,6 +128,9 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, o
           facetsPerPage={facetsPerPage}
           selectedFacets={selectedFacets[currentFacetGroup.idName] ?? []}
           onSelection={onSelection}
+          onClose={() => {
+            setCurrentFacetGroup(null)
+          }}
         />
       )}
     </>

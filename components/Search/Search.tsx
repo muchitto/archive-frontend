@@ -13,7 +13,7 @@ import PageButton from "./PageButton"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { atom, useAtom } from "jotai"
 import qs from "qs"
-import { useDebounce, useRunOnce } from "../../utils/hooks"
+import { useDebounce, useRunOnce, useThrottle } from "../../utils/hooks"
 import Config from "../../utils/Config"
 
 import refreshCWIcon from "../../assets/icons/refresh-cw.svg"
