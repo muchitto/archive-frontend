@@ -20,8 +20,8 @@ export default function ResultItem({ doc }: SearchItemProps) {
 
   return (
     <a href={`https://archive.org/details/${doc.identifier}`} className="cursor-pointer">
-      <div className="border-2 border-rose-200 flex justify-between flex-col mb-5 lg:mb-0 h-full w-full">
-        <div className="w-full h-full">
+      <div className="border-2 border-amber-300 p-5 flex justify-between flex-col mb-5 lg:mb-0 h-full w-full">
+        <div className="w-full h-ful">
           <Image src={imageURL} width="100" height="100" className="w-full" />
         </div>
         <div className="flex flex-col p-2 w-full">
