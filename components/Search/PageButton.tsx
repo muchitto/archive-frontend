@@ -19,7 +19,7 @@ export default function PageButton({ textTop, textBottom, className, showText, i
         <a href="#" onClick={(event) => {
           event.preventDefault()
           onClick(event)
-        }}>
+        }} className="inline-block">
           {icon}
         </a>
       </div>

@@ -22,7 +22,7 @@ export default function ResultItem({ doc }: SearchItemProps) {
     <a href={`https://archive.org/details/${doc.identifier}`} className="cursor-pointer">
       <div className="border-2 border-rose-100 p-5 flex justify-between flex-col mb-5 lg:mb-0 h-full w-full">
         <div className="w-full h-ful">
-          <Image src={imageURL} width="100" height="100" className="w-full" />
+          <Image src={imageURL} width="100" height="100" className="w-full" alt={doc.title} priority={true} />
         </div>
         <div className="flex flex-col p-2 w-full">
           <div className="text-lg text-center p-2 w-full">

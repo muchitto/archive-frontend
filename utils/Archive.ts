@@ -66,13 +66,6 @@ export const AllMediaTypes : { [key: string] : MediaType} = {
   "Web": MediaType.Web
 }
 
-export interface SearchQuery {
-  query: SearchQueryDetail
-  rows: number
-  page: number
-  output?: "json" | "xml"
-}
-
 export type FacetGroupSelections = { 
   [key: string] : Facet[] 
 }
@@ -80,6 +73,13 @@ export type FacetGroupSelections = {
 export interface SearchQueryDetail {
   any: string
   facets: FacetGroupSelections
+}
+
+export interface SearchQuery {
+  query: SearchQueryDetail
+  rows: number
+  page: number
+  output?: "json" | "xml"
 }
 
 export interface CategoryQuery {

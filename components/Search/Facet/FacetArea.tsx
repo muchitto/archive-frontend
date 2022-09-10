@@ -3,7 +3,7 @@ import { useState } from "react"
 import { FacetGroup, FacetSearchResultPretty, FacetGroupSelections, facetTypeList, Facet } from "../../../utils/Archive"
 import FacetGroupButton from "./FacetGroupButton"
 import { useQueries, useQuery } from "@tanstack/react-query"
-import { useDebounce } from "../../../utils/hooks"
+import { useDebounce, useInitialized } from "../../../utils/hooks"
 import Config from "../../../utils/Config"
 
 import FacetSelectionArea from "./FacetSelectionArea"
@@ -12,11 +12,12 @@ interface FacetAreaProps {
   facetsPerPage: number
   searchText: string
   selectedFacets: FacetGroupSelections
+  shouldClose?: boolean
   onSelection: (facetGroup: FacetGroup, facets: Facet[]) => void
   onOpen?: (open: boolean) => void
 }
 
-export default function FacetArea({ facetsPerPage, searchText, selectedFacets, onSelection, onOpen }: FacetAreaProps) {
+export default function FacetArea({ facetsPerPage, searchText, selectedFacets, shouldClose, onSelection, onOpen }: FacetAreaProps) {
   const [currentFacetGroup, setCurrentFacetGroup] = useState(null as FacetGroup | null)
 
   const facetResults = useQueries({
@@ -120,11 +121,11 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, o
             />)
         })}
       </div>
-      {currentFacetGroup && (
+      {currentFacetGroup && !shouldClose && (
         <FacetSelectionArea 
           facets={facetLists[currentFacetGroup.idName] ?? []} 
           facetGroup={currentFacetGroup}
-          isOpen={currentFacetGroup != null}
+          isOpen={(currentFacetGroup != null && !shouldClose)}
           facetsPerPage={facetsPerPage}
           selectedFacets={selectedFacets[currentFacetGroup.idName] ?? []}
           onSelection={onSelection}
