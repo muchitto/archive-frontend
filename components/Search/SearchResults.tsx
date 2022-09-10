@@ -1,4 +1,3 @@
-import { useAtom } from "jotai";
 import { useState } from "react";
 import { Doc, SearchQuery, SearchResult } from "../../utils/Archive";
 import ResultItem from "./SearchItem";
