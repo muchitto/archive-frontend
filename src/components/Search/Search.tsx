@@ -66,7 +66,6 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
   const haveResults = (data) ? data?.response?.docs.length > 0 : false
   const isChangingPage = pageButtonClicked != null
 
-
   const nextPage = () => {
     setUsedPageButtons(true)
     setPage(page + 1)

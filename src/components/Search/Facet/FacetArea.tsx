@@ -72,7 +72,6 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
     setCurrentFacetGroup(null)
   }, [searchText])
 
-  // Report selection changes that happens
   return (
     <>
       <div className="flex flex-wrap items-center">

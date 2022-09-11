@@ -8,7 +8,9 @@ const nextConfig = {
     } 
   },
   images: {
-    domains: ['archive.org'],
+    domains: [
+      'archive.org'
+    ],
   },
 }
 
