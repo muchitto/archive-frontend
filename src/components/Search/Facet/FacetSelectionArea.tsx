@@ -1,7 +1,7 @@
 import Image from "next/future/image"
 import { useMemo, useState } from "react"
-import { Facet, FacetGroup } from "../../../utils/Archive"
-import { useThrottle } from "../../../utils/hooks"
+import { Facet, FacetGroup } from "../../../inc/Archive/Search"
+import { useThrottle } from "../../../inc/hooks"
 import * as Checkbox from "@radix-ui/react-checkbox"
 import * as Label from '@radix-ui/react-label'
 
@@ -25,7 +25,7 @@ interface FacetSelectionAreaProps {
 
 interface FacetSelectionCheckProps {
   facet: Facet
-  isSelected: boolean,
+  isSelected: boolean
   className?: string
   onSelection: (isChecked: boolean) => void
 }

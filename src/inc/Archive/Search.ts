@@ -1,157 +1,94 @@
-import { stringify } from "querystring"
+import { stringify } from "qs"
+import { MediaType } from "./Archive"
 
 export interface SearchResult {
   responseHeader: {
-    status: number;
-    QTime: number;
+    status: number
+    QTime: number
     params: {
-      query: string;
-      qin: string;
-      fields: string;
-      rows: string;
-      start: number;
-    };
-  };
+      query: string
+      qin: string
+      fields: string
+      rows: string
+      start: number
+    }
+  }
   response: {
-    numFound: number;
-    start: number;
-    docs: Doc[];
-  };
+    numFound: number
+    start: number
+    docs: Doc[]
+  }
 }
 
 export interface Doc {
-  title: string;
-  backup_location: string;
-  collection: string[];
-  contributor: string;
-  creator: string;
-  date: string;
-  description: string;
-  downloads: number;
-  "external-identifier": string[];
-  foldoutcount: number;
-  format: string[];
-  identifier: string;
-  imagecount?: number;
-  indexflag: string[];
-  item_size: number;
-  language: string;
-  mediatype: MediaType;
-  oai_updatedate: string[];
-  publicdate: string;
-  publisher?: string;
-  week?: number;
-  year?: number;
-  month?: number;
-}
-
-export interface File {
-  crc32: string;
-  format: string;
-  md5: string;
-  mtime: number;
-  name: string;
-  rotation: number;
-  sha1: string;
-  size: number;
-  source: string;
-}
-
-export interface Metadata {
-  created: number;
-  d1: string;
-  d2: string;
-  d3: string;
-  dir: string;
-  files: File[];
-  files_count: number;
-  item_last_updated: number;
-  item_size: number;
-  metadata: {
-    addeddate: string;
-    backup_location: string;
-    collection: string[];
-    creator: string;
-    curation: string;
-    date: string;
-    description: string;
-    identifier: string;
-    language: string;
-    mediatype: MediaType;
-    publicdate: string;
-    scanner: string;
-    subject: string[];
-    title: string;
-    uploader: string;
-  };
-  server: string;
-  uniq: number;
-  workable_servers: string[];
-}
-
-export enum MediaType {
-  Account = "account",
-  Audio = "audio",
-  Data = "data",
-  Image = "image",
-  Movies = "movies",
-  Texts = "texts",
-  Web = "web",
-}
-
-export const AllMediaTypes: { [key: string]: MediaType } = {
-  Account: MediaType.Account,
-  Audio: MediaType.Audio,
-  Data: MediaType.Data,
-  Image: MediaType.Image,
-  Movies: MediaType.Movies,
-  Texts: MediaType.Texts,
-  Web: MediaType.Web,
+  title: string
+  backup_location: string
+  collection: string[]
+  contributor: string
+  creator: string
+  date: string
+  description: string
+  downloads: number
+  "external-identifier": string[]
+  foldoutcount: number
+  format: string[]
+  identifier: string
+  imagecount?: number
+  indexflag: string[]
+  item_size: number
+  language: string
+  mediatype: MediaType
+  oai_updatedate: string[]
+  publicdate: string
+  publisher?: string
+  week?: number
+  year?: number
+  month?: number
 }
 
 export type FacetGroupSelections = {
-  [key: string]: Facet[];
-};
+  [key: string]: Facet[]
+}
 
 export interface SearchQueryDetail {
-  any: string;
-  facets: FacetGroupSelections;
+  any: string
+  facets: FacetGroupSelections
 }
 
 export interface SearchQuery {
-  query: SearchQueryDetail;
-  rows: number;
-  page: number;
-  output?: "json" | "xml";
+  query: SearchQueryDetail
+  rows: number
+  page: number
+  output?: "json" | "xml"
 }
 
 export interface CategoryQuery {
-  any: string;
-  facet: string;
+  any: string
+  facet: string
 }
 
 export interface Facet {
-  n?: number;
-  val: number | string;
-  group: FacetGroup;
+  n?: number
+  val: number | string
+  group: FacetGroup
 }
 
 export interface FacetGroup {
-  name: string;
-  idName: string;
+  name: string
+  idName: string
 }
 
 export interface FacetSearchResult {
-  checked: any[];
-  hdr: string;
-  morf: string;
-  options: Facet[];
-  submit: string;
+  checked: any[]
+  hdr: string
+  morf: string
+  options: Facet[]
+  submit: string
 }
 
 export interface FacetSearchResultPretty {
-  facetGroup: FacetGroup;
-  facets: Facet[];
+  facetGroup: FacetGroup
+  facets: Facet[]
 }
 
 export const facetTypeList: { [key: string]: FacetGroup } = {
@@ -314,17 +251,4 @@ export async function fetchDataWithQuery(
   const data = await fetch(urlPrefix)
 
   return await data.json()
-}
-
-export async function getItemMetadta(
-  identifier: string
-): Promise<Metadata | null> {
-  const request = await fetch(`https://archive.org/metadata/${identifier}`)
-  const data = await request.json()
-
-  if (!data) {
-    return null
-  }
-
-  return data as Metadata
 }

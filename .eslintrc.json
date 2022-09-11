@@ -13,8 +13,15 @@
   "rules": {
     "unused-imports/no-unused-imports": "error",
     "no-var": "error",
-    "semi": ["error", "never"],
+    "semi": "off",
     "no-unused-vars": "off",
+    "indent": ["error", 2],
+    "@typescript-eslint/semi": ["error", "never"],
+    "@typescript-eslint/member-delimiter-style": ["error", {
+      "multiline": {
+        "delimiter": "none"
+      }
+    }],
     "no-unexpected-multiline": "error",
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn" // Checks effect dependencies

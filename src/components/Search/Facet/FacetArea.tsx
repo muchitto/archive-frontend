@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react"
 import { useState } from "react"
-import { FacetGroup, FacetSearchResultPretty, FacetGroupSelections, facetTypeList, Facet } from "../../../utils/Archive"
+import { FacetGroup, FacetSearchResultPretty, FacetGroupSelections, facetTypeList, Facet } from "../../../inc/Archive/Search"
 import FacetGroupButton from "./FacetGroupButton"
 import { useQueries } from "@tanstack/react-query"
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
 import Image from "next/future/image"
-import { SearchQuery, fetchDataWithQuery, SearchResult } from "../../utils/Archive"
+import { SearchQuery, fetchDataWithQuery, SearchResult } from "../../inc/Archive/Search"
 import SearchResults from "./SearchResults"
 import { useRouter } from "next/router"
 import FacetArea, { useFacetPanelOpenAtom } from "./Facet/FacetArea"
 import PageButton from "./PageButton"
 import { useQuery } from "@tanstack/react-query"
-import { useDebounce, useInitialized, useRunOnce } from "../../utils/hooks"
-import Config from "../../utils/Config"
+import { useDebounce, useInitialized, useRunOnce } from "../../inc/hooks"
+import Config from "../../inc/Config"
 
 import refreshCWIcon from "../../assets/icons/refresh-cw.svg"
 import leftIcon from "../../assets/icons/left.svg"
@@ -151,9 +151,9 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
         />
       </form>
       {(data || isFacetAreaOpen) && (
-        <FacetArea 
-          searchText={debounceSearchText} 
-          facetsPerPage={50} 
+        <FacetArea
+          searchText={debounceSearchText}
+          facetsPerPage={50}
           shouldClose={isChangingPage}
           selectedFacets={facetSelections}
           onSelection={(facetGroup, facets) => {
@@ -186,7 +186,7 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
           <SearchResults page={page} rows={rows} result={data}/>
         )}
       </div>
-      
+
       {(isChangingPage || (page > 1 && haveResults)) && (
         <PageButton
           className="fixed inset-y-1/2 left-4"
@@ -195,19 +195,19 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
           showText={usedPageButtons}
           icon={
             (pageButtonClicked == PageDirection.Previous) ?
-            (
-              <Image 
-                src={refreshCWIcon} 
-                alt="Loading previous page" 
-                className="animate-spin mt-2" 
-                width="35" 
-                height="35" 
-              />
-            )
-            :
-            (
-            <Image src={leftIcon} alt="Previous page" />
-          )}
+              (
+                <Image
+                  src={refreshCWIcon}
+                  alt="Loading previous page"
+                  className="animate-spin mt-2"
+                  width="35"
+                  height="35"
+                />
+              )
+              :
+              (
+                <Image src={leftIcon} alt="Previous page" />
+              )}
           onClick={() => {
             prevPage()
           }}
@@ -221,12 +221,12 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
           showText={usedPageButtons}
           icon={pageButtonClicked == PageDirection.Next ?
             (
-              <Image 
-                src={refreshCWIcon} 
-                alt="Loading next page" 
-                className="animate-spin mt-2" 
-                width="35" 
-                height="35" 
+              <Image
+                src={refreshCWIcon}
+                alt="Loading next page"
+                className="animate-spin mt-2"
+                width="35"
+                height="35"
               />
             )
             : (

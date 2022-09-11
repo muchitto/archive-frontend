@@ -1,6 +1,6 @@
 import Image from "next/future/image"
 import Link from "next/link"
-import { Doc } from "../../utils/Archive"
+import { Doc } from "../../inc/Archive/Search"
 
 interface SearchItemProps {
   pos: number

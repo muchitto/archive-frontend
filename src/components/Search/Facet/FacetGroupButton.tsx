@@ -1,5 +1,5 @@
 import Image from "next/future/image"
-import { FacetGroup } from "../../../utils/Archive"
+import { FacetGroup } from "../../../inc/Archive/Search"
 
 import refreshCWIcon from "../../../assets/icons/refresh-cw.svg"
 

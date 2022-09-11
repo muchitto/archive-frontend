@@ -1,7 +1,7 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Search from '../components/Search/Search'
-import { Facet, SearchQuery, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchResult } from '../utils/Archive'
-import Config from '../utils/Config'
+import { Facet, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchQuery, SearchResult } from '../inc/Archive/Search'
+import Config from '../inc/Config'
 
 interface HomeProps {
   initialQuery: SearchQuery
