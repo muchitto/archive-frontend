@@ -1,7 +1,4 @@
 import type { GetServerSideProps, NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import { useRouter } from 'next/router'
 import Search from '../components/Search/Search'
 import { Facet, SearchQuery, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchResult } from '../utils/Archive'
 import Config from '../utils/Config'
@@ -33,7 +30,7 @@ export const getServerSideProps : GetServerSideProps<HomeProps> = async (context
   const page = parseInt(context.query.page as string) || 1
 
   const newSelectedFacets : FacetGroupSelections = {}
-  for(let queryName in context.query) {
+  for(const queryName in context.query) {
     if(queryName.startsWith("facet:")) {
       const facetGroupIdName = queryName.replace(/^facet\:/, "")
       let value = context.query[queryName]

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { CategoryQuery, convertFacetResultToPretty, Facet, FacetSearchResult, FacetSearchResultPretty, fetchFacets, fetchFacetsPretty } from '../../utils/Archive'
+import { CategoryQuery, FacetSearchResultPretty, fetchFacetsPretty } from '../../utils/Archive'
 
 export default async function handler(
     req: NextApiRequest,

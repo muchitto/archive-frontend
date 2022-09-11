@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { Doc, SearchQuery, SearchResult } from "../../utils/Archive";
-import ResultItem from "./SearchItem";
+import { SearchResult } from "../../utils/Archive"
+import ResultItem from "./SearchItem"
 
 interface SearchResultsProps {
   page: number
@@ -20,8 +19,8 @@ export default function SearchResults({ result, page, rows}: SearchResultsProps)
             <div>Pages: {page} / {allPages}</div>
           </div>
           <div className="md:grid md:grid-flow-row-dense md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-            {result.response.docs.map((doc) => {
-              return (<ResultItem doc={doc} key={doc.identifier} />)
+            {result.response.docs.map((doc, index) => {
+              return (<ResultItem pos={index} doc={doc} key={doc.identifier} />)
             })}
           </div>
         </>

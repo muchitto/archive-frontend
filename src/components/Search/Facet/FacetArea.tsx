@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo } from "react"
 import { useState } from "react"
 import { FacetGroup, FacetSearchResultPretty, FacetGroupSelections, facetTypeList, Facet } from "../../../utils/Archive"
 import FacetGroupButton from "./FacetGroupButton"
-import { useQueries, useQuery } from "@tanstack/react-query"
-import { useDebounce, useInitialized } from "../../../utils/hooks"
-import Config from "../../../utils/Config"
+import { useQueries } from "@tanstack/react-query"
 
 import FacetSelectionArea from "./FacetSelectionArea"
+import { atom, useAtom } from "jotai"
 
 interface FacetAreaProps {
   facetsPerPage: number
@@ -17,8 +16,11 @@ interface FacetAreaProps {
   onOpen?: (open: boolean) => void
 }
 
+export const useFacetPanelOpenAtom = atom(false)
+
 export default function FacetArea({ facetsPerPage, searchText, selectedFacets, shouldClose, onSelection, onOpen }: FacetAreaProps) {
   const [currentFacetGroup, setCurrentFacetGroup] = useState(null as FacetGroup | null)
+  const [openPanel, setOpenPanel] = useAtom(useFacetPanelOpenAtom)
 
   const facetResults = useQueries({
     queries: Object.keys(facetTypeList).map(groupIdName => {
@@ -55,7 +57,7 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
   const selectedFacetsFiltered = useMemo(() => {
     const out : FacetGroupSelections = {}
 
-    for(let facetId in selectedFacets) {
+    for(const facetId in selectedFacets) {
       out[facetId] = selectedFacets[facetId].filter(facet => {
         if(facetLists[facetId]) {
           return facetLists[facetId].some(f => f.val == facet.val)
@@ -71,6 +73,12 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
   useEffect(() => {
     setCurrentFacetGroup(null)
   }, [searchText])
+
+  useEffect(() => {
+    if(!openPanel) {
+      setCurrentFacetGroup(null)
+    }
+  }, [openPanel])
 
   return (
     <>
@@ -105,12 +113,14 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
 
                 if(isOpen) {
                   setCurrentFacetGroup(null)
+                  setOpenPanel(false)
 
                   if(onOpen) {
                     onOpen(false)
                   }
                 } else {
                   setCurrentFacetGroup(facetGroup)
+                  setOpenPanel(true)
 
                   if(onOpen) {
                     onOpen(true)
@@ -120,7 +130,7 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
             />)
         })}
       </div>
-      {currentFacetGroup && !shouldClose && (
+      {openPanel && currentFacetGroup && (
         <FacetSelectionArea 
           facets={facetLists[currentFacetGroup.idName] ?? []} 
           facetGroup={currentFacetGroup}

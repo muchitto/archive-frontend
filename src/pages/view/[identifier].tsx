@@ -1,29 +1,25 @@
 import { GetServerSideProps, NextPage } from "next"
-import { useRouter } from "next/router"
 
 interface ViewProps {
-    
+  identifier: string
 }
 
-const View: NextPage<ViewProps> = ({} : ViewProps) => {
-    const router = useRouter()
+const View: NextPage<ViewProps> = ({ identifier }: ViewProps) => {
+  return (
+    <>
+    </>
+  )
+}
 
-    const identifier = router.query.identifier as string
+export const getServerSideProps: GetServerSideProps<ViewProps> = async (context) => {
+  const identifier = context.query.identifier as string
 
-    return (
-        <>
-        </>
-    )
+  return {
+    props: {
+      identifier,
+
+    }
+  }
 }
 
 export default View
-
-
-export const getServerSideProps : GetServerSideProps<ViewProps> = async (context) => {
-    const identifier = context.query.identifier as string
-
-    return {
-      props: {
-      }
-    }
-  }

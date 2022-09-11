@@ -1,18 +1,17 @@
 import Image from "next/future/image"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Facet, FacetGroup } from "../../../utils/Archive"
+import { useThrottle } from "../../../utils/hooks"
+import * as Checkbox from "@radix-ui/react-checkbox"
+import * as Label from '@radix-ui/react-label'
 
 import searchIcon from "../../../assets/icons/search.svg"
 import xIcon from "../../../assets/icons/x.svg"
 import upIcon from "../../../assets/icons/up.svg"
 import downIcon from "../../../assets/icons/down.svg"
-import style from "../Search.module.scss"
-import { useDebounce, useThrottle } from "../../../utils/hooks"
-import * as Checkbox from "@radix-ui/react-checkbox"
-import * as Label from '@radix-ui/react-label'
-
 import checkSquareIcon from "../../../assets/icons/check-square.svg"
 import squareIcon from "../../../assets/icons/square.svg"
+
 
 interface FacetSelectionAreaProps {
   facets: Facet[]

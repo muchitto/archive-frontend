@@ -12,7 +12,7 @@ interface PageButtonProps {
 export default function PageButton({ textTop, textBottom, className, showText, icon, onClick }: PageButtonProps) {
   return (
     <div className={`${className} text-center text-lg`}>
-      <label className={`pb-2 block animate-pulse ${!showText ? 'block' : 'invisible'}`}>
+      <label className={`p-1 block bg-white border-2 border-black mb-2 ${!showText ? 'block' : 'invisible'}`}>
         {textTop}
       </label>
       <div className="rounded-full bg-white w-14 h-14 block border-2 border-black hover:shadow-btn">
@@ -23,7 +23,7 @@ export default function PageButton({ textTop, textBottom, className, showText, i
           {icon}
         </a>
       </div>
-      <label className={`pt-2 block animate-pulse ${!showText ? 'block' : 'invisible'}`}>
+      <label className={`p-1 block bg-white border-2 border-black mt-2 ${!showText ? 'block' : 'invisible'}`}>
         {textBottom}
       </label>
     </div>

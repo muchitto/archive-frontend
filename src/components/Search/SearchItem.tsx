@@ -1,9 +1,9 @@
-import Image from "next/future/image";
-import Link from "next/link";
-import { useEffect } from "react";
-import { Doc } from "../../utils/Archive";
+import Image from "next/future/image"
+import Link from "next/link"
+import { Doc } from "../../utils/Archive"
 
 interface SearchItemProps {
+  pos: number
   doc: Doc
 }
 
@@ -13,16 +13,20 @@ export const MediaTypeIcons : { [key: string] : string } = {
   "audio": "volume.svg"
 }
 
-const metadataURL = "https://archive.org/metadata/"
-
-export default function ResultItem({ doc }: SearchItemProps) {
+export default function ResultItem({pos, doc }: SearchItemProps) {
   const imageURL = `http://archive.org/services/img/${doc.identifier}`
 
   return (
-    <a href={`https://archive.org/details/${doc.identifier}`} className="cursor-pointer">
-      <div className="border-2 border-rose-100 p-5 flex justify-between flex-col mb-5 lg:mb-0 h-full w-full">
+    <Link href={`/view/${doc.identifier}`} className="cursor-pointer">
+      <div className="border-2 border-rose-100 p-5 flex justify-between flex-col mb-5 lg:mb-0 h-full w-full cursor-pointer">
         <div className="w-full h-ful">
-          <Image src={imageURL} width="100" height="100" className="w-full" alt={doc.title} priority={true} />
+          <Image 
+            src={imageURL} 
+            width="100" 
+            height="100" 
+            className="w-full" 
+            alt={doc.title}
+          />
         </div>
         <div className="flex flex-col p-2 w-full">
           <div className="text-lg text-center p-2 w-full">
@@ -35,6 +39,6 @@ export default function ResultItem({ doc }: SearchItemProps) {
           </div>
         </div>
       </div>
-    </a>
+    </Link>
   )
 }

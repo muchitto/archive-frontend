@@ -1,23 +1,18 @@
-import { useEffect, useState, useCallback, useRef } from "react"
-import style from "./Search.module.scss"
-import { stringify, parse } from "query-string"
-
+import { useEffect, useState } from "react"
 import Image from "next/future/image"
-import { debounce, first, last, throttle, update } from 'lodash'
 import { SearchQuery, fetchDataWithQuery, SearchResult } from "../../utils/Archive"
-import ResultItem from "./SearchItem"
 import SearchResults from "./SearchResults"
 import { useRouter } from "next/router"
-import FacetArea from "./Facet/FacetArea"
+import FacetArea, { useFacetPanelOpenAtom } from "./Facet/FacetArea"
 import PageButton from "./PageButton"
-import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import qs from "qs"
-import { useDebounce, useInitialized, useRunOnce, useThrottle } from "../../utils/hooks"
+import { useQuery } from "@tanstack/react-query"
+import { useDebounce, useInitialized, useRunOnce } from "../../utils/hooks"
 import Config from "../../utils/Config"
 
 import refreshCWIcon from "../../assets/icons/refresh-cw.svg"
 import leftIcon from "../../assets/icons/left.svg"
 import rightIcon from "../../assets/icons/right.svg"
+import { useAtom } from "jotai"
 
 interface SearchProps {
   initialQuery: SearchQuery
@@ -32,6 +27,7 @@ enum PageDirection {
 export default function Search({ initialQuery, initialResults }: SearchProps) {
   const [page, setPage] = useState(initialQuery.page)
   const [rows, setRows] = useState(initialQuery.rows)
+  const [openPanel, setOpenPanel] = useAtom(useFacetPanelOpenAtom)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
   const [isFacetAreaOpen, setIsFacetAreaOpen] = useState(false)
   const [facetSelections, setFacetSelections] = useState(initialQuery.query.facets || {})
@@ -42,7 +38,7 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
   const debounceSearchText = useDebounce(searchText, Config.defaultSearchDebounceTime)
 
   const router = useRouter()
-  
+
   const { isFetching, data } = useQuery(["runSearch", page, rows, debounceSearchText, facetSelections], () => {
     if(!debounceSearchText) {
       return null
@@ -70,18 +66,20 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
     setUsedPageButtons(true)
     setPage(page + 1)
     setPageButtonClicked(PageDirection.Next)
+    setOpenPanel(false)
   }
 
   const prevPage = () => {
     setUsedPageButtons(true)
     setPage(page - 1)
     setPageButtonClicked(PageDirection.Previous)
+    setOpenPanel(false)
   }
 
   const updateUrl = () => {
     const facetList: { [key: string]: string[] } = {}
 
-    for (let facetGroup in facetSelections) {
+    for (const facetGroup in facetSelections) {
       facetList["facet:" + facetGroup] = facetSelections[facetGroup].map((facet) => facet.val + "")
     }
 
@@ -128,7 +126,7 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
     <div>
       {!isChangingPage && isFetching && isFacetAreaOpen && (
         <div className="fixed top-5 right-5">
-          <Image src={refreshCWIcon} className="animate-spin w-8" alt="Loading..." />
+          <Image src={refreshCWIcon} className="animate-spin w-8" alt="Loading..." priority={true} />
         </div>
       )}
       <form onSubmit={(event) => {
@@ -176,7 +174,7 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
       <div className="py-5">
         {!isChangingPage && isFetching && (
           <div className="text-2xl font-bold uppercase p-5 flex justify-center">
-            <Image src={refreshCWIcon} className="animate-spin" width="100" height="100" alt="Loading..." />
+            <Image src={refreshCWIcon} className="animate-spin" width="100" height="100" alt="Loading..." priority={true} />
           </div>
         )}
         {currentStatusText && (

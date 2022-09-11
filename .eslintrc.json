@@ -1,10 +1,21 @@
 {
-  "extends": "next/core-web-vitals",
-  "plugins": [
-    "react-hooks"
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended"
   ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "react-hooks",
+    "unused-imports",
+    "@typescript-eslint"
+  ],
+  "root": true,
   "rules": {
-    // ...
+    "unused-imports/no-unused-imports": "error",
+    "no-var": "error",
+    "semi": ["error", "never"],
+    "no-unused-vars": "off",
+    "no-unexpected-multiline": "error",
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn" // Checks effect dependencies
   }
