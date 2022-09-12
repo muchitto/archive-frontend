@@ -17,6 +17,11 @@ export default function BookReader ({ metadata }: BookReaderProps) {
 
   const hasMoreSpreads = (pageSpreads && pageSpreads.length > 0) ? pageSpreads.length > pageSpread : false
 
+  const currentSpreadData = pageSpreads[pageSpread]
+
+  const pageL = (currentSpreadData) ?  currentSpreadData[0] : null
+  const pageR = (currentSpreadData && currentSpreadData[1]) ? currentSpreadData[1] : null
+
   if(metadata) {
     getBookReaderDataWithMetadata(metadata).then(async data => {
       const pages = data?.data.brOptions.data
@@ -30,8 +35,6 @@ export default function BookReader ({ metadata }: BookReaderProps) {
     })
   }
 
-  const currentSpreadData = pageSpreads[pageSpread]
-
   if(!currentSpreadData) {
     return (
       <div>
@@ -39,9 +42,6 @@ export default function BookReader ({ metadata }: BookReaderProps) {
       </div>
     )
   }
-
-  const pageL = currentSpreadData[0]
-  const pageR = (currentSpreadData[1]) ? currentSpreadData[1] : null
 
   return (
     <div>
@@ -52,7 +52,7 @@ export default function BookReader ({ metadata }: BookReaderProps) {
               className='fixed inset-y-1/2 left-4'
               showText={true}
               onClick={(event) => {
-                setPageSpread(pageSpread - 1)
+                setPageSpread(p => p - 1)
               }}
               content={
                 <Image src={leftIcon} alt="Previous page" />
@@ -61,14 +61,16 @@ export default function BookReader ({ metadata }: BookReaderProps) {
             />
           )}
           <div className='flex w-full'>
-            <Image
-              src={pageL.uri}
-              width={pageL.width}
-              height={pageL.height}
-              alt={'Page'}
-              className="w-1/2"
-              priority={true}
-            />
+            {pageL && (
+              <Image
+                src={pageL.uri}
+                width={pageL.width}
+                height={pageL.height}
+                alt={'Page'}
+                className="w-1/2"
+                priority={true}
+              />
+            )}
             {pageR && (
               <Image
                 src={pageR.uri}
@@ -85,10 +87,10 @@ export default function BookReader ({ metadata }: BookReaderProps) {
               className='fixed inset-y-1/2 right-4'
               showText={true}
               onClick={(event) => {
-                setPageSpread(pageSpread + 1)
+                setPageSpread(p => p + 1)
               }}
               content={
-                <Image src={rightIcon} alt="Previous page" />
+                <Image src={rightIcon} alt="Next page" />
               }
               hideTextWhenClick={true}
             />

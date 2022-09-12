@@ -1,11 +1,19 @@
 import { MediaType } from './Archive'
 
 export enum FileFormat {
-  PDF = 'Image Container PDF',
+  ImageContainerPDF = 'Image Container PDF',
+  TextPDF = 'Text PDF',
   Bittorrent = 'Archive BitTorrent',
   Metadata = 'Metadata',
   ItemTile = 'Item tile',
-  Unknown = 'Unknown'
+  Unknown = 'Unknown',
+  SignlePageProcessedJP2Zip = 'Single Page Processed JP2 ZIP',
+  DjvuXML = 'Djvu XML',
+  DjvuTXT = 'DjVuTXT',
+  AbbyyGZ = 'Abbyy GZ',
+  Scandata = 'Scandata',
+  ComicBookRAR = 'Comic Book RAR',
+  AnimatedGIF = 'Animated GIF',
 }
 
 export interface File {

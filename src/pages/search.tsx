@@ -28,9 +28,8 @@ enum PageDirection {
 const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchProps) => {
   const [page, setPage] = useState(initialQuery.page)
   const [rows, setRows] = useState(initialQuery.rows)
-  const [openPanel, setOpenPanel] = useAtom(useFacetPanelOpenAtom)
+  const [isFacetPanelOpen, setIsFacetPanelOpen] = useAtom(useFacetPanelOpenAtom)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
-  const [isFacetAreaOpen, setIsFacetAreaOpen] = useState(false)
   const [facetSelections, setFacetSelections] = useState(initialQuery.query.facets || {})
   const [pageChangeDirection, setPageChangeDirection] = useState<PageDirection | null>(null)
   const [searchText, setSearchText] = useState(initialQuery.query.any)
@@ -72,16 +71,16 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
 
   const nextPage = () => {
     setUsedPageButtons(true)
-    setPage(page + 1)
+    setPage(prev => prev + 1)
     setPageChangeDirection(PageDirection.Next)
-    setOpenPanel(false)
+    setIsFacetPanelOpen(false)
   }
 
   const prevPage = () => {
     setUsedPageButtons(true)
-    setPage(page - 1)
+    setPage(prev => prev - 1)
     setPageChangeDirection(PageDirection.Previous)
-    setOpenPanel(false)
+    setIsFacetPanelOpen(false)
   }
 
   const updateUrl = () => {
@@ -118,14 +117,14 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
   if(!isFetching) {
     if (debounceSearchText.length == 0) {
       currentStatusText = 'Start by typing something in the textfield'
-    } else if(data && !data?.response.docs.length) {
+    } else if(data && !data?.response?.docs.length) {
       currentStatusText = 'No results found with these search terms'
     }
   }
 
   return (
     <div>
-      {!isChangingPage && isFetching && isFacetAreaOpen && (
+      {!isChangingPage && isFetching && isFacetPanelOpen && (
         <div className="fixed top-5 right-5">
           <Image src={refreshCWIcon} className="animate-spin w-8" alt="Loading..." priority={true} />
         </div>
@@ -151,7 +150,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
           }}
         />
       </form>
-      {(data || isFacetAreaOpen) && (
+      {(data || isFacetPanelOpen) && (
         <FacetArea
           searchText={debounceSearchText}
           facetsPerPage={50}
@@ -165,9 +164,6 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
             newFacetSelections[facetGroup.idName] = facets
 
             setFacetSelections(newFacetSelections)
-          }}
-          onOpen={(isOpen) => {
-            setIsFacetAreaOpen(isOpen)
           }}
         />
       )}
@@ -183,7 +179,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
             {currentStatusText}
           </div>
         )}
-        {data && data.response.docs.length > 0 && (
+        {data && data.response?.docs.length > 0 && (
           <SearchResults page={page} rows={rows} result={data}/>
         )}
       </div>
@@ -200,7 +196,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
                 <Image
                   src={refreshCWIcon}
                   alt="Loading previous page"
-                  className="animate-spin mt-2"
+                  className="animate-spin mt-2 ml-2"
                   width="35"
                   height="35"
                 />
@@ -225,7 +221,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
               <Image
                 src={refreshCWIcon}
                 alt="Loading next page"
-                className="animate-spin mt-2"
+                className="animate-spin mt-2 ml-2"
                 width="35"
                 height="35"
               />

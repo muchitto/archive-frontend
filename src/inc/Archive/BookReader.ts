@@ -95,13 +95,14 @@ export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promis
   url.searchParams.set('format', 'json')
   url.searchParams.set('requestUri', `/details/${metadata.metadata.identifier}`)
 
-  const pdf = getItemMetadataPDF(metadata)
+  const file = getItemMetadataFirstFile(metadata)
 
-  if(!pdf || !pdf.name) {
+  if(!file || !file.name) {
     return null
   }
 
-  const filename = path.parse(pdf.name)
+  const filename = path.parse(file.name)
+
   url.searchParams.set('subPrefix', filename.name)
 
   const request = await fetch(url)
@@ -113,13 +114,20 @@ export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promis
   return await request.json() as BookReaderResult
 }
 
-
-export function getItemMetadataPDF(metadata: Metadata) : File | null {
-  const pdfFile = metadata.files.find(file => file.format == FileFormat.PDF)
-
-  if(!pdfFile) {
+export function getItemMetadataFirstFile(metadata: Metadata) {
+  if(metadata.files.length == 0) {
     return null
   }
 
-  return pdfFile
+  return metadata.files[0]
+}
+
+export function getItemMetadataWithFormat(metadata: Metadata, format: FileFormat) : File | null {
+  const file = metadata.files.find(file => file.format == format)
+
+  if(!file) {
+    return null
+  }
+
+  return file
 }

@@ -1,29 +1,17 @@
 import { GetServerSideProps, NextPage } from 'next'
-import BookReader from '../../components/View/BookReader/BookReader'
-import { MediaType } from '../../inc/Archive/Archive'
+import ViewPlayer from '../../components/View/ViewPlayer'
 import { getItemMetadata, Metadata } from '../../inc/Archive/Metadata'
 
 interface ViewProps {
+  identifier: string
   metadata: Metadata | null
 }
 
-const ViewPlayer = ({ metadata }: { metadata: Metadata }) => {
-  const mediatype = metadata?.metadata.mediatype
+const View: NextPage<ViewProps> = ({ identifier, metadata }: ViewProps) => {
 
-  if(mediatype == MediaType.Texts) {
-    return (
-      <BookReader metadata={metadata} />
-    )
-  }
-
-  return (
-    <div>
-      No reader yet for mediatype {mediatype}
-    </div>
-  )
-}
-
-const View: NextPage<ViewProps> = ({ metadata }: ViewProps) => {
+  getItemMetadata(identifier).then(data => {
+    console.log(data)
+  })
 
   return (
     <>

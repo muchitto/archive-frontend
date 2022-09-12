@@ -235,13 +235,19 @@ export async function fetchDataWithQuery(
     return null
   }
 
+  const newURL = getAvancedSearchURL(query)
+
+  const data = await fetch(newURL)
+
+  return await data.json()
+}
+
+export const getAvancedSearchURL = (query: SearchQuery) =>  {
   const newURL = new URL('https://archive.org/advancedsearch.php')
   newURL.searchParams.set('rows', query.rows + '')
   newURL.searchParams.set('page', query.page + '')
   newURL.searchParams.set('output', (query.output ?? 'json') + '')
   newURL.searchParams.set('q', queryDetailFormatter(query.query))
 
-  const data = await fetch(newURL)
-
-  return await data.json()
+  return decodeURI(newURL.toString())
 }
