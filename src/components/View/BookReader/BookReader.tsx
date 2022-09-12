@@ -4,6 +4,9 @@ import { BookReaderBookSpread, getBookReaderDataWithMetadata } from '../../../in
 import { Metadata } from '../../../inc/Archive/Metadata'
 import PageButton from '../../Common/PageButton'
 
+import leftIcon from '../../../assets/icons/left.svg'
+import rightIcon from '../../../assets/icons/right.svg'
+
 interface BookReaderProps {
   metadata: Metadata | null
 }
@@ -52,9 +55,7 @@ export default function BookReader ({ metadata }: BookReaderProps) {
                 setPageSpread(pageSpread - 1)
               }}
               content={
-                <>
-                Prev
-                </>
+                <Image src={leftIcon} alt="Previous page" />
               }
               hideTextWhenClick={true}
             />
@@ -66,6 +67,7 @@ export default function BookReader ({ metadata }: BookReaderProps) {
               height={pageL.height}
               alt={'Page'}
               className="w-1/2"
+              priority={true}
             />
             {pageR && (
               <Image
@@ -74,6 +76,7 @@ export default function BookReader ({ metadata }: BookReaderProps) {
                 height={pageR.height}
                 alt={'Page'}
                 className="w-1/2"
+                priority={true}
               />
             )}
           </div>
@@ -85,9 +88,7 @@ export default function BookReader ({ metadata }: BookReaderProps) {
                 setPageSpread(pageSpread + 1)
               }}
               content={
-                <>
-                Next
-                </>
+                <Image src={rightIcon} alt="Previous page" />
               }
               hideTextWhenClick={true}
             />
