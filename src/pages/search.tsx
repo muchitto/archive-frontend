@@ -1,18 +1,19 @@
-import { useEffect, useState } from "react"
-import Image from "next/future/image"
-import { SearchQuery, fetchDataWithQuery, SearchResult } from "../../inc/Archive/Search"
-import SearchResults from "./SearchResults"
-import { useRouter } from "next/router"
-import FacetArea, { useFacetPanelOpenAtom } from "./Facet/FacetArea"
-import PageButton from "./PageButton"
-import { useQuery } from "@tanstack/react-query"
-import { useDebounce, useInitialized, useRunOnce } from "../../inc/hooks"
-import Config from "../../inc/Config"
+import { useAtom } from 'jotai'
+import { GetServerSideProps, NextPage } from 'next'
+import Image from 'next/future/image'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import FacetArea, { useFacetPanelOpenAtom } from '../components/Search/Facet/FacetArea'
+import PageButton from '../components/Common/PageButton'
+import { Facet, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchQuery, SearchResult } from '../inc/Archive/Search'
+import config from '../inc/Config'
+import { useDebounce, useInitialized, useRunOnce } from '../inc/hooks'
+import { useQuery } from '@tanstack/react-query'
 
-import refreshCWIcon from "../../assets/icons/refresh-cw.svg"
-import leftIcon from "../../assets/icons/left.svg"
-import rightIcon from "../../assets/icons/right.svg"
-import { useAtom } from "jotai"
+import refreshCWIcon from '../assets/icons/refresh-cw.svg'
+import leftIcon from '../assets/icons/left.svg'
+import rightIcon from '../assets/icons/right.svg'
+import SearchResults from '../components/Search/SearchResults'
 
 interface SearchProps {
   initialQuery: SearchQuery
@@ -24,22 +25,29 @@ enum PageDirection {
   Next
 }
 
-export default function Search({ initialQuery, initialResults }: SearchProps) {
+const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchProps) => {
   const [page, setPage] = useState(initialQuery.page)
   const [rows, setRows] = useState(initialQuery.rows)
   const [openPanel, setOpenPanel] = useAtom(useFacetPanelOpenAtom)
   const [usedPageButtons, setUsedPageButtons] = useState(false)
   const [isFacetAreaOpen, setIsFacetAreaOpen] = useState(false)
   const [facetSelections, setFacetSelections] = useState(initialQuery.query.facets || {})
-  const [pageButtonClicked, setPageButtonClicked] = useState<PageDirection | null>(null)
+  const [pageChangeDirection, setPageChangeDirection] = useState<PageDirection | null>(null)
   const [searchText, setSearchText] = useState(initialQuery.query.any)
 
   const initialized = useInitialized(false)
-  const debounceSearchText = useDebounce(searchText, Config.defaultSearchDebounceTime)
+  const debounceSearchText = useDebounce(searchText, config.defaultSearchDebounceTime)
 
   const router = useRouter()
 
-  const { isFetching, data } = useQuery(["runSearch", page, rows, debounceSearchText, facetSelections], () => {
+  useRunOnce(() => {
+    router.beforePopState(() => {
+      router.reload()
+      return true
+    })
+  })
+
+  const { isFetching, data } = useQuery(['runSearch', page, rows, debounceSearchText, facetSelections], () => {
     if(!debounceSearchText) {
       return null
     }
@@ -60,19 +68,19 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
 
   const haveMoreResults = (data) ? data?.response?.numFound / rows > page : false
   const haveResults = (data) ? data?.response?.docs.length > 0 : false
-  const isChangingPage = pageButtonClicked != null
+  const isChangingPage = pageChangeDirection != null
 
   const nextPage = () => {
     setUsedPageButtons(true)
     setPage(page + 1)
-    setPageButtonClicked(PageDirection.Next)
+    setPageChangeDirection(PageDirection.Next)
     setOpenPanel(false)
   }
 
   const prevPage = () => {
     setUsedPageButtons(true)
     setPage(page - 1)
-    setPageButtonClicked(PageDirection.Previous)
+    setPageChangeDirection(PageDirection.Previous)
     setOpenPanel(false)
   }
 
@@ -80,11 +88,10 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
     const facetList: { [key: string]: string[] } = {}
 
     for (const facetGroup in facetSelections) {
-      facetList["facet:" + facetGroup] = facetSelections[facetGroup].map((facet) => facet.val + "")
+      facetList['facet:' + facetGroup] = facetSelections[facetGroup].map((facet) => facet.val + '')
     }
 
     router.push({
-      pathname: `/`,
       query: {
         ...facetList,
         any: searchText,
@@ -96,29 +103,23 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
     })
   }
 
-  useRunOnce(() => {
-    router.beforePopState((state) => {
-      router.reload()
-      return true
-    })
-  })
 
   useEffect(() => {
     updateUrl()
   }, [facetSelections, debounceSearchText, page, rows])
 
   useEffect(() => {
-    if(!isFetching && pageButtonClicked != null) {
-      setPageButtonClicked(null)
+    if(!isFetching && pageChangeDirection != null) {
+      setPageChangeDirection(null)
     }
-  }, [isFetching, pageButtonClicked])
+  }, [isFetching, pageChangeDirection])
 
-  let currentStatusText = ""
+  let currentStatusText = ''
   if(!isFetching) {
     if (debounceSearchText.length == 0) {
-      currentStatusText = "Start by typing something in the textfield"
+      currentStatusText = 'Start by typing something in the textfield'
     } else if(data && !data?.response.docs.length) {
-      currentStatusText = "No results found with these search terms"
+      currentStatusText = 'No results found with these search terms'
     }
   }
 
@@ -144,7 +145,7 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
           }}
 
           onKeyDown={(event) => {
-            if (event.key == "Enter") {
+            if (event.key == 'Enter') {
               event.preventDefault()
             }
           }}
@@ -193,8 +194,8 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
           textTop="Prev"
           textBottom="Page"
           showText={usedPageButtons}
-          icon={
-            (pageButtonClicked == PageDirection.Previous) ?
+          content={
+            (pageChangeDirection == PageDirection.Previous) ?
               (
                 <Image
                   src={refreshCWIcon}
@@ -219,7 +220,7 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
           textTop="Next"
           textBottom="Page"
           showText={usedPageButtons}
-          icon={pageButtonClicked == PageDirection.Next ?
+          content={pageChangeDirection == PageDirection.Next ?
             (
               <Image
                 src={refreshCWIcon}
@@ -240,4 +241,57 @@ export default function Search({ initialQuery, initialResults }: SearchProps) {
       )}
     </div>
   )
+}
+
+export default Search
+
+export const getServerSideProps : GetServerSideProps<SearchProps> = async (context) => {
+  const any = context.query.any as string || ''
+  const rows = parseInt(context.query.rows as string) || config.defaultRows
+  const page = parseInt(context.query.page as string) || 1
+
+  const newSelectedFacets : FacetGroupSelections = {}
+  for(const queryName in context.query) {
+    if(queryName.startsWith('facet:')) {
+      const facetGroupIdName = queryName.replace(/^facet\:/, '')
+      let value = context.query[queryName] as string[]
+
+      if(!Array.isArray(value)) {
+        value = [value as string]
+      }
+
+      if(!newSelectedFacets[facetGroupIdName]) {
+        newSelectedFacets[facetGroupIdName] = []
+      }
+
+      const facets : Facet[] = value.map(facetId => {
+        return {
+          group: facetTypeList[facetGroupIdName],
+          val: facetId
+        }
+      })
+
+      newSelectedFacets[facetGroupIdName].push(
+        ...facets
+      )
+    }
+  }
+
+  const initialQuery = {
+    query: {
+      any,
+      facets: newSelectedFacets
+    },
+    rows,
+    page,
+  }
+
+  const initialResults = await fetchDataWithQuery(initialQuery)
+
+  return {
+    props: {
+      initialQuery,
+      initialResults
+    }
+  }
 }

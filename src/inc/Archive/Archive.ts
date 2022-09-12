@@ -1,12 +1,12 @@
 
 export enum MediaType {
-  Account = "account",
-  Audio = "audio",
-  Data = "data",
-  Image = "image",
-  Movies = "movies",
-  Texts = "texts",
-  Web = "web",
+  Account = 'account',
+  Audio = 'audio',
+  Data = 'data',
+  Image = 'image',
+  Movies = 'movies',
+  Texts = 'texts',
+  Web = 'web',
 }
 
 export const AllMediaTypes: { [key: string]: MediaType } = {

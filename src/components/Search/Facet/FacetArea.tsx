@@ -1,11 +1,11 @@
-import { useEffect, useMemo } from "react"
-import { useState } from "react"
-import { FacetGroup, FacetSearchResultPretty, FacetGroupSelections, facetTypeList, Facet } from "../../../inc/Archive/Search"
-import FacetGroupButton from "./FacetGroupButton"
-import { useQueries } from "@tanstack/react-query"
+import { useEffect, useMemo } from 'react'
+import { useState } from 'react'
+import { FacetGroup, FacetSearchResultPretty, FacetGroupSelections, facetTypeList, Facet } from '../../../inc/Archive/Search'
+import FacetGroupButton from './FacetGroupButton'
+import { useQueries } from '@tanstack/react-query'
 
-import FacetSelectionArea from "./FacetSelectionArea"
-import { atom, useAtom } from "jotai"
+import FacetSelectionArea from './FacetSelectionArea'
+import { atom, useAtom } from 'jotai'
 
 interface FacetAreaProps {
   facetsPerPage: number
@@ -66,7 +66,7 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
         return false
       }) ?? []
     }
-        
+
     return out
   }, [facetLists, selectedFacets])
 
@@ -94,7 +94,7 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
           const isLoading = result?.isFetching ?? true
           const isOpened = currentFacetGroup?.idName == facetGroup?.idName
           const isError = result?.isError ?? false
-          
+
           const selectedFacetCount = selectedFacetsFiltered[facetGroup.idName]?.length ?? 0
           const totalFacetCount = facetLists[facetGroup.idName]?.length ?? 0
 
@@ -107,7 +107,7 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
               isError={isError}
               totalFacetCount={totalFacetCount}
               selectedFacetCount={selectedFacetCount}
-              
+
               onToggle={() => {
                 const isOpen = currentFacetGroup?.idName == facetGroup.idName
 
@@ -131,8 +131,8 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, s
         })}
       </div>
       {openPanel && currentFacetGroup && (
-        <FacetSelectionArea 
-          facets={facetLists[currentFacetGroup.idName] ?? []} 
+        <FacetSelectionArea
+          facets={facetLists[currentFacetGroup.idName] ?? []}
           facetGroup={currentFacetGroup}
           isOpen={(currentFacetGroup != null && !shouldClose)}
           facetsPerPage={facetsPerPage}

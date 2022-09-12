@@ -1,8 +1,16 @@
-import { MediaType } from "./Archive"
+import { MediaType } from './Archive'
+
+export enum FileFormat {
+  PDF = 'Image Container PDF',
+  Bittorrent = 'Archive BitTorrent',
+  Metadata = 'Metadata',
+  ItemTile = 'Item tile',
+  Unknown = 'Unknown'
+}
 
 export interface File {
   crc32: string
-  format: string
+  format: FileFormat
   md5: string
   mtime: number
   name: string
@@ -31,9 +39,15 @@ export interface Metadata {
     date: string
     description: string
     identifier: string
+    'identifier-access'?: string
+    'identifier-ark'?: string
+    licenseurl: string
     language: string
     mediatype: MediaType
+    ocr?: string
+    ppi?: number
     publicdate: string
+    repub_state?: string
     scanner: string
     subject: string[]
     title: string

@@ -1,5 +1,4 @@
-import { stringify } from "qs"
-import { MediaType } from "./Archive"
+import { MediaType } from './Archive'
 
 export interface SearchResult {
   responseHeader: {
@@ -29,7 +28,7 @@ export interface Doc {
   date: string
   description: string
   downloads: number
-  "external-identifier": string[]
+  'external-identifier': string[]
   foldoutcount: number
   format: string[]
   identifier: string
@@ -59,7 +58,7 @@ export interface SearchQuery {
   query: SearchQueryDetail
   rows: number
   page: number
-  output?: "json" | "xml"
+  output?: 'json' | 'xml'
 }
 
 export interface CategoryQuery {
@@ -93,32 +92,32 @@ export interface FacetSearchResultPretty {
 
 export const facetTypeList: { [key: string]: FacetGroup } = {
   creator: {
-    name: "Creator",
-    idName: "creator",
+    name: 'Creator',
+    idName: 'creator',
   },
   collection: {
-    name: "Collection",
-    idName: "collection",
+    name: 'Collection',
+    idName: 'collection',
   },
   subject: {
-    name: "Subject",
-    idName: "subject",
+    name: 'Subject',
+    idName: 'subject',
   },
   year: {
-    name: "Year",
-    idName: "year",
+    name: 'Year',
+    idName: 'year',
   },
   mediatype: {
-    name: "MediaType",
-    idName: "mediatype",
+    name: 'MediaType',
+    idName: 'mediatype',
   },
   lending___status: {
-    name: "Lending status",
-    idName: "lending___status",
+    name: 'Lending status',
+    idName: 'lending___status',
   },
   languageSorter: {
-    name: "Language",
-    idName: "languageSorter",
+    name: 'Language',
+    idName: 'languageSorter',
   },
 }
 
@@ -133,13 +132,13 @@ export function queryDetailFormatter(data: SearchQueryDetail) {
     }
 
     if (q.length > 0) {
-      q += " AND "
+      q += ' AND '
     }
 
-    let localq = ""
+    let localq = ''
     for (const facet of data.facets[key]) {
       if (localq.length > 0) {
-        localq += ` OR `
+        localq += ' OR '
       }
 
       localq += `${key}:(${facet.val})`
@@ -236,19 +235,13 @@ export async function fetchDataWithQuery(
     return null
   }
 
-  let urlPrefix =
-    `https://archive.org/advancedsearch.php?` +
-    stringify({
-      rows: query.rows,
-      page: query.page,
-      output: query.output || "json",
-    })
+  const newURL = new URL('https://archive.org/advancedsearch.php')
+  newURL.searchParams.set('rows', query.rows + '')
+  newURL.searchParams.set('page', query.page + '')
+  newURL.searchParams.set('output', (query.output ?? 'json') + '')
+  newURL.searchParams.set('q', queryDetailFormatter(query.query))
 
-  if (query.query) {
-    urlPrefix += `&q=${queryDetailFormatter(query.query)}`
-  }
-
-  const data = await fetch(urlPrefix)
+  const data = await fetch(newURL)
 
   return await data.json()
 }

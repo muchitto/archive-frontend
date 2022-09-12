@@ -1,6 +1,6 @@
-import Image from "next/future/image"
-import Link from "next/link"
-import { Doc } from "../../inc/Archive/Search"
+import Image from 'next/future/image'
+import Link from 'next/link'
+import { Doc } from '../../inc/Archive/Search'
 
 interface SearchItemProps {
   pos: number
@@ -8,9 +8,9 @@ interface SearchItemProps {
 }
 
 export const MediaTypeIcons : { [key: string] : string } = {
-  "account": "user.svg",
-  "movies": "film.svg",
-  "audio": "volume.svg"
+  'account': 'user.svg',
+  'movies': 'film.svg',
+  'audio': 'volume.svg'
 }
 
 export default function ResultItem({pos, doc }: SearchItemProps) {
@@ -20,11 +20,11 @@ export default function ResultItem({pos, doc }: SearchItemProps) {
     <Link href={`/view/${doc.identifier}`} className="cursor-pointer">
       <div className="border-2 border-rose-100 p-5 flex justify-between flex-col mb-5 lg:mb-0 h-full w-full cursor-pointer">
         <div className="w-full h-ful">
-          <Image 
-            src={imageURL} 
-            width="100" 
-            height="100" 
-            className="w-full" 
+          <Image
+            src={imageURL}
+            width="100"
+            height="100"
+            className="w-full"
             alt={doc.title}
           />
         </div>

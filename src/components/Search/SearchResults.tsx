@@ -1,5 +1,5 @@
-import { SearchResult } from "../../inc/Archive/Search"
-import ResultItem from "./SearchItem"
+import { SearchResult } from '../../inc/Archive/Search'
+import ResultItem from './SearchItem'
 
 interface SearchResultsProps {
   page: number

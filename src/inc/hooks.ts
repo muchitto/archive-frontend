@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Some of these are from https://usehooks.com/
 
@@ -59,12 +59,12 @@ export const useRunOnce = (func: () => void, areTruthy: unknown[] = []) => {
       func()
       init.current = true
     }
-  }, [init, canSet])
+  }, [func, init, canSet])
 }
 
 export const useInitialized = (initialValue: boolean, areTruthy : unknown[] = []) => {
   const isInitialized = useRef(initialValue)
-  
+
   useRunOnce(() => {
     isInitialized.current = true
   }, areTruthy)
@@ -75,10 +75,11 @@ export const useInitialized = (initialValue: boolean, areTruthy : unknown[] = []
 export const useToggle = (initialState = false) => {
   // Initialize the state
   const [state, setState] = useState(initialState)
-  
+
   // Define and memorize toggler function in case we pass down the component,
   // This function change the boolean value to it's opposite value
   const toggle = useCallback(() => setState(state => !state), [])
-  
+
   return [state, toggle]
 }
+

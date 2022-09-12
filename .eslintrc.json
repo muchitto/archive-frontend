@@ -17,11 +17,13 @@
     "no-unused-vars": "off",
     "indent": ["error", 2],
     "@typescript-eslint/semi": ["error", "never"],
+    "quotes": ["error", "single"],
     "@typescript-eslint/member-delimiter-style": ["error", {
       "multiline": {
         "delimiter": "none"
       }
     }],
+    "@typescript-eslint/no-empty-interface": "warn",
     "no-unexpected-multiline": "error",
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn" // Checks effect dependencies

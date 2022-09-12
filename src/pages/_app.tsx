@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Image from 'next/future/image'
 import Link from 'next/link'
 
-import logoIcon from "../assets/icons/logo.svg"
+import logoIcon from '../assets/icons/logo.svg'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const queryClient = new QueryClient({
@@ -24,7 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <header className="py-10">
         <div className="flex items-center w-full">
           <Image src={logoIcon} alt="Archive" />
-          <label className='inline-block text-4xl md:text-6xl font-bold ml-5 md:ml-10 uppercase'>
+          <label className='inline-block text-4xl md:text-6xl lg:text-8xl font-bold ml-5 md:ml-10 uppercase'>
             <Link href="/">
               Archive
             </Link>
@@ -32,7 +32,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         </div>
       </header>
       <Component {...pageProps} />
-      {process.env.NODE_ENV == "development" && <ReactQueryDevtools />}
+      {process.env.NODE_ENV == 'development' && <ReactQueryDevtools />}
     </QueryClientProvider>
   )
 }

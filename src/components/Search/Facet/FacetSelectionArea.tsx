@@ -1,16 +1,16 @@
-import Image from "next/future/image"
-import { useMemo, useState } from "react"
-import { Facet, FacetGroup } from "../../../inc/Archive/Search"
-import { useThrottle } from "../../../inc/hooks"
-import * as Checkbox from "@radix-ui/react-checkbox"
+import Image from 'next/future/image'
+import { useMemo, useState } from 'react'
+import { Facet, FacetGroup } from '../../../inc/Archive/Search'
+import { useThrottle } from '../../../inc/hooks'
+import * as Checkbox from '@radix-ui/react-checkbox'
 import * as Label from '@radix-ui/react-label'
 
-import searchIcon from "../../../assets/icons/search.svg"
-import xIcon from "../../../assets/icons/x.svg"
-import upIcon from "../../../assets/icons/up.svg"
-import downIcon from "../../../assets/icons/down.svg"
-import checkSquareIcon from "../../../assets/icons/check-square.svg"
-import squareIcon from "../../../assets/icons/square.svg"
+import searchIcon from '../../../assets/icons/search.svg'
+import xIcon from '../../../assets/icons/x.svg'
+import upIcon from '../../../assets/icons/up.svg'
+import downIcon from '../../../assets/icons/down.svg'
+import checkSquareIcon from '../../../assets/icons/check-square.svg'
+import squareIcon from '../../../assets/icons/square.svg'
 
 
 interface FacetSelectionAreaProps {
@@ -31,17 +31,17 @@ interface FacetSelectionCheckProps {
 }
 
 export function FacetSelectionCheck ({ facet, className, isSelected, onSelection } : FacetSelectionCheckProps) {
-  const facetId = "facet_" + facet.val
+  const facetId = 'facet_' + facet.val
 
   return (
-    <Checkbox.Root 
-      checked={isSelected} 
-      onCheckedChange={onSelection} 
+    <Checkbox.Root
+      checked={isSelected}
+      onCheckedChange={onSelection}
       className={`flex content-center min-w-fit ${className} hover:underline p-1`}>
       <Checkbox.Indicator forceMount={true} className="inline-block">
-        <Image 
-          src={isSelected ? checkSquareIcon : squareIcon} 
-          alt={"Facet checkbox"} 
+        <Image
+          src={isSelected ? checkSquareIcon : squareIcon}
+          alt={'Facet checkbox'}
           width="30"
           height="30"
         />
@@ -54,13 +54,13 @@ export function FacetSelectionCheck ({ facet, className, isSelected, onSelection
 }
 
 export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, selectedFacets, facets, onClose, onSelection }: FacetSelectionAreaProps) {
-  const [filterSearchText, setFilterSearchText] = useState("")
+  const [filterSearchText, setFilterSearchText] = useState('')
   const [page, setPage] = useState(1)
   const throttledFilterSearchText = useThrottle(filterSearchText, 100)
 
   const currentFilteredList = useMemo(() => {
     const searchFilteredList = facets.filter(facet => {
-      return (facet.val + "").toLowerCase().trim().includes(throttledFilterSearchText.trim().toLowerCase())
+      return (facet.val + '').toLowerCase().trim().includes(throttledFilterSearchText.trim().toLowerCase())
     })
 
     return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage)
@@ -103,14 +103,14 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
             Clear
           </button>
         </div>
-        <button 
+        <button
           className=""
           onClick={event => {
             event.preventDefault()
-            
+
             setPage(1)
             onClose()
-          }} 
+          }}
         >
           <Image src={xIcon} alt="Close" />
         </button>
@@ -120,11 +120,11 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
         <div className="flex flex-wrap mt-5 border-b-2 border-black p-2">
           {selectedFacets.map(facet => {
             return (
-              <FacetSelectionCheck 
+              <FacetSelectionCheck
                 className="mr-2 mb-2"
                 key={facet.val}
                 facet={facet}
-                isSelected={true} 
+                isSelected={true}
                 onSelection={(isChecked) => {
                   onSelection(facetGroup, selectedFacets.filter(f => f.val != facet.val))
                 }}
@@ -150,7 +150,7 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
             No filters in this category with this query
           </div>
         )}
-        {currentFilteredList.length == 0 && filterSearchText != "" && (
+        {currentFilteredList.length == 0 && filterSearchText != '' && (
           <div className="text-2xl">
             Cannot find anything with that filter search text
           </div>
@@ -163,9 +163,9 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
           return (
             <FacetSelectionCheck
               className="mr-2 mb-2"
-              key={facet.val} 
+              key={facet.val}
               facet={facet}
-              isSelected={false} 
+              isSelected={false}
               onSelection={(isChecked) => {
                 const newFacetSelection = [...selectedFacets]
                 newFacetSelection.push(facet)
