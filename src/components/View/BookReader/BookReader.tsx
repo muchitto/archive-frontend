@@ -59,13 +59,13 @@ export default function BookReader ({ metadata }: BookReaderProps) {
               hideTextWhenClick={true}
             />
           )}
-          <div className='flex'>
+          <div className='flex w-full'>
             <Image
               src={pageL.uri}
               width={pageL.width}
               height={pageL.height}
               alt={'Page'}
-              className="w-full"
+              className="w-1/2"
             />
             {pageR && (
               <Image
@@ -73,7 +73,7 @@ export default function BookReader ({ metadata }: BookReaderProps) {
                 width={pageR.width}
                 height={pageR.height}
                 alt={'Page'}
-                className="w-full"
+                className="w-1/2"
               />
             )}
           </div>
