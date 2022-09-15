@@ -189,7 +189,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
             className="fixed inset-y-1/2 left-4"
             textTop="Prev"
             textBottom="Page"
-            showText={usedPageButtons}
+            showText={!usedPageButtons}
             content={
               (pageChangeDirection == PageDirection.Previous) ?
                 (
@@ -215,7 +215,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
             className="fixed inset-y-1/2 right-4"
             textTop="Next"
             textBottom="Page"
-            showText={usedPageButtons}
+            showText={!usedPageButtons}
             content={pageChangeDirection == PageDirection.Next ?
               (
                 <Image
