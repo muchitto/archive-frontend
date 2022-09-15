@@ -1,4 +1,5 @@
 import { GetServerSideProps, NextPage } from 'next';
+import Regular from '../../components/Layouts/Regular';
 import ViewPlayer from '../../components/View/ViewPlayer';
 import { getItemMetadata, Metadata } from '../../inc/Archive/Metadata';
 
@@ -9,7 +10,7 @@ interface ViewProps {
 
 const View: NextPage<ViewProps> = ({ identifier, metadata }: ViewProps) => {
   return (
-    <>
+    <Regular title={metadata?.metadata.title}>
       <div>
         <h1 className="text-5xl pb-10 italic font-bold text-center">
           {metadata?.metadata.title}
@@ -24,7 +25,7 @@ const View: NextPage<ViewProps> = ({ identifier, metadata }: ViewProps) => {
           )}
         </div>
       </div>
-    </>
+    </Regular>
   );
 };
 

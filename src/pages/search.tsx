@@ -14,6 +14,7 @@ import refreshCWIcon from '../assets/icons/refresh-cw.svg';
 import leftIcon from '../assets/icons/left.svg';
 import rightIcon from '../assets/icons/right.svg';
 import SearchResults from '../components/Search/SearchResults';
+import Regular from '../components/Layouts/Regular';
 
 interface SearchProps {
   initialQuery: SearchQuery
@@ -122,118 +123,120 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
   }
 
   return (
-    <div>
-      {!isChangingPage && isFetching && isFacetPanelOpen && (
-        <div className="fixed top-5 right-5">
-          <Image src={refreshCWIcon} className="animate-spin w-8" alt="Loading..." priority={true} />
+    <Regular title='Search'>
+      <div>
+        {!isChangingPage && isFetching && isFacetPanelOpen && (
+          <div className="fixed top-5 right-5">
+            <Image src={refreshCWIcon} className="animate-spin w-8" alt="Loading..." priority={true} />
+          </div>
+        )}
+        <form onSubmit={(event) => {
+          event.preventDefault();
+        }}>
+          <input
+            type="text"
+            defaultValue={searchText}
+            className="border-2 border-black w-full p-3 font-serif italic text-2xl focus:shadow-btn"
+
+            onChange={(event) => {
+              const value = event.target.value;
+              setSearchText(value);
+              setPage(1);
+            }}
+
+            onKeyDown={(event) => {
+              if (event.key == 'Enter') {
+                event.preventDefault();
+              }
+            }}
+          />
+        </form>
+        {(data || isFacetPanelOpen) && (
+          <FacetArea
+            searchText={debounceSearchText}
+            facetsPerPage={50}
+            selectedFacets={facetSelections}
+            onSelection={(facetGroup, facets) => {
+              const newFacetSelections = {
+                ...facetSelections
+              };
+
+              newFacetSelections[facetGroup.idName] = facets;
+
+              setFacetSelections(newFacetSelections);
+            }}
+          />
+        )}
+
+        <div className="py-5">
+          {!isChangingPage && isFetching && (
+            <div className="text-2xl font-bold uppercase p-5 flex justify-center">
+              <Image src={refreshCWIcon} className="animate-spin" width="100" height="100" alt="Loading..." priority={true} />
+            </div>
+          )}
+          {currentStatusText && (
+            <div className="text-3xl uppercase font-bold">
+              {currentStatusText}
+            </div>
+          )}
+          {data && data.response?.docs.length > 0 && (
+            <SearchResults page={page} rows={rows} result={data}/>
+          )}
         </div>
-      )}
-      <form onSubmit={(event) => {
-        event.preventDefault();
-      }}>
-        <input
-          type="text"
-          defaultValue={searchText}
-          className="border-2 border-black w-full p-3 font-serif italic text-2xl focus:shadow-btn"
 
-          onChange={(event) => {
-            const value = event.target.value;
-            setSearchText(value);
-            setPage(1);
-          }}
-
-          onKeyDown={(event) => {
-            if (event.key == 'Enter') {
-              event.preventDefault();
-            }
-          }}
-        />
-      </form>
-      {(data || isFacetPanelOpen) && (
-        <FacetArea
-          searchText={debounceSearchText}
-          facetsPerPage={50}
-          selectedFacets={facetSelections}
-          onSelection={(facetGroup, facets) => {
-            const newFacetSelections = {
-              ...facetSelections
-            };
-
-            newFacetSelections[facetGroup.idName] = facets;
-
-            setFacetSelections(newFacetSelections);
-          }}
-        />
-      )}
-
-      <div className="py-5">
-        {!isChangingPage && isFetching && (
-          <div className="text-2xl font-bold uppercase p-5 flex justify-center">
-            <Image src={refreshCWIcon} className="animate-spin" width="100" height="100" alt="Loading..." priority={true} />
-          </div>
+        {(isChangingPage || (page > 1 && haveResults)) && (
+          <PageButton
+            className="fixed inset-y-1/2 left-4"
+            textTop="Prev"
+            textBottom="Page"
+            showText={usedPageButtons}
+            content={
+              (pageChangeDirection == PageDirection.Previous) ?
+                (
+                  <Image
+                    src={refreshCWIcon}
+                    alt="Loading previous page"
+                    className="animate-spin mt-2 ml-2"
+                    width="35"
+                    height="35"
+                  />
+                )
+                :
+                (
+                  <Image src={leftIcon} alt="Previous page" />
+                )}
+            onClick={() => {
+              prevPage();
+            }}
+          />
         )}
-        {currentStatusText && (
-          <div className="text-3xl uppercase font-bold">
-            {currentStatusText}
-          </div>
-        )}
-        {data && data.response?.docs.length > 0 && (
-          <SearchResults page={page} rows={rows} result={data}/>
-        )}
-      </div>
-
-      {(isChangingPage || (page > 1 && haveResults)) && (
-        <PageButton
-          className="fixed inset-y-1/2 left-4"
-          textTop="Prev"
-          textBottom="Page"
-          showText={usedPageButtons}
-          content={
-            (pageChangeDirection == PageDirection.Previous) ?
+        {(isChangingPage || haveMoreResults) && (
+          <PageButton
+            className="fixed inset-y-1/2 right-4"
+            textTop="Next"
+            textBottom="Page"
+            showText={usedPageButtons}
+            content={pageChangeDirection == PageDirection.Next ?
               (
                 <Image
                   src={refreshCWIcon}
-                  alt="Loading previous page"
+                  alt="Loading next page"
                   className="animate-spin mt-2 ml-2"
                   width="35"
                   height="35"
                 />
               )
-              :
-              (
-                <Image src={leftIcon} alt="Previous page" />
-              )}
-          onClick={() => {
-            prevPage();
-          }}
-        />
-      )}
-      {(isChangingPage || haveMoreResults) && (
-        <PageButton
-          className="fixed inset-y-1/2 right-4"
-          textTop="Next"
-          textBottom="Page"
-          showText={usedPageButtons}
-          content={pageChangeDirection == PageDirection.Next ?
-            (
-              <Image
-                src={refreshCWIcon}
-                alt="Loading next page"
-                className="animate-spin mt-2 ml-2"
-                width="35"
-                height="35"
-              />
-            )
-            : (
-              <Image src={rightIcon} alt="Next page" />
-            )
-          }
-          onClick={(event) => {
-            nextPage();
-          }}
-        />
-      )}
-    </div>
+              : (
+                <Image src={rightIcon} alt="Next page" />
+              )
+            }
+            onClick={(event) => {
+              nextPage();
+            }}
+          />
+        )}
+      </div>
+    </Regular>
   );
 };
 
