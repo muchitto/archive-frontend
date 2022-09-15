@@ -2,14 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  experimental: {
-    images: { 
-      allowFutureImage: true 
-    } 
-  },
   images: {
-    domains: ['archive.org'],
+    domains: [
+      'archive.org',
+      'ia600803.us.archive.org',
+      'ia800803.us.archive.org',
+      'ia800204.us.archive.org',
+      'ia600904.us.archive.org',
+    ]
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
