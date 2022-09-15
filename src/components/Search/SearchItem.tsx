@@ -1,6 +1,6 @@
-import Image from 'next/future/image'
-import Link from 'next/link'
-import { Doc } from '../../inc/Archive/Search'
+import Image from 'next/future/image';
+import Link from 'next/link';
+import { Doc } from '../../inc/Archive/Search';
 
 interface SearchItemProps {
   pos: number
@@ -11,10 +11,10 @@ export const MediaTypeIcons : { [key: string] : string } = {
   'account': 'user.svg',
   'movies': 'film.svg',
   'audio': 'volume.svg'
-}
+};
 
 export default function ResultItem({pos, doc }: SearchItemProps) {
-  const imageURL = `http://archive.org/services/img/${doc.identifier}`
+  const imageURL = `http://archive.org/services/img/${doc.identifier}`;
 
   return (
     <Link href={`/view/${doc.identifier}`} className="cursor-pointer">
@@ -40,5 +40,5 @@ export default function ResultItem({pos, doc }: SearchItemProps) {
         </div>
       </div>
     </Link>
-  )
+  );
 }

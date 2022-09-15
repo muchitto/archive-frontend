@@ -1,4 +1,4 @@
-import { MouseEvent, useRef } from 'react'
+import { MouseEvent, useRef } from 'react';
 
 interface PageButtonProps {
   textTop?: string
@@ -19,10 +19,10 @@ export default function PageButton({
   content,
   onClick
 } : PageButtonProps) {
-  const clicked = useRef(false)
-  const shouldShowClick = !(hideTextWhenClick && clicked.current)
-  const showTopText = showText && textTop && shouldShowClick
-  const showBottomText = showText && textBottom && shouldShowClick
+  const clicked = useRef(false);
+  const shouldShowClick = !(hideTextWhenClick && clicked.current);
+  const showTopText = showText && textTop && shouldShowClick;
+  const showBottomText = showText && textBottom && shouldShowClick;
 
   return (
     <div className={`${className} text-center text-lg`}>
@@ -30,9 +30,9 @@ export default function PageButton({
         {textTop}
       </label>
       <a href="#" onClick={(event) => {
-        event.preventDefault()
-        clicked.current = true
-        onClick(event)
+        event.preventDefault();
+        clicked.current = true;
+        onClick(event);
       }} className="inline-block">
         <div className="rounded-full bg-white w-14 h-14 block border-2 border-black hover:shadow-btn">
           {content}
@@ -42,5 +42,5 @@ export default function PageButton({
         {textBottom}
       </label>
     </div>
-  )
+  );
 }

@@ -17,4 +17,4 @@ export const AllMediaTypes: { [key: string]: MediaType } = {
   Movies: MediaType.Movies,
   Texts: MediaType.Texts,
   Web: MediaType.Web,
-}
+};

@@ -2,27 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  experimental: {
-    images: {
-      allowFutureImage: true
-    }
-  },
   images: {
     domains: [
       'archive.org',
       'ia600803.us.archive.org',
-      'ia800803.us.archive.org'
+      'ia800803.us.archive.org',
+      'ia800204.us.archive.org',
+      'ia600904.us.archive.org',
     ]
   },
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/search',
-        permanent: false,
-      }
-    ]
-  }
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

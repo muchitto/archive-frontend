@@ -1,22 +1,21 @@
-import Image from 'next/future/image'
-import { useMemo, useState } from 'react'
-import { Facet, FacetGroup } from '../../../inc/Archive/Search'
-import { useThrottle } from '../../../inc/hooks'
-import * as Checkbox from '@radix-ui/react-checkbox'
-import * as Label from '@radix-ui/react-label'
+import Image from 'next/future/image';
+import { useMemo, useState } from 'react';
+import { Facet, FacetGroup } from '../../../inc/Archive/Search';
+import { useThrottle } from '../../../inc/hooks';
+import * as Checkbox from '@radix-ui/react-checkbox';
+import * as Label from '@radix-ui/react-label';
 
-import searchIcon from '../../../assets/icons/search.svg'
-import xIcon from '../../../assets/icons/x.svg'
-import upIcon from '../../../assets/icons/up.svg'
-import downIcon from '../../../assets/icons/down.svg'
-import checkSquareIcon from '../../../assets/icons/check-square.svg'
-import squareIcon from '../../../assets/icons/square.svg'
+import searchIcon from '../../../assets/icons/search.svg';
+import xIcon from '../../../assets/icons/x.svg';
+import upIcon from '../../../assets/icons/up.svg';
+import downIcon from '../../../assets/icons/down.svg';
+import checkSquareIcon from '../../../assets/icons/check-square.svg';
+import squareIcon from '../../../assets/icons/square.svg';
 
 
 interface FacetSelectionAreaProps {
   facets: Facet[]
   facetGroup: FacetGroup
-  isOpen: boolean
   facetsPerPage: number
   selectedFacets: Facet[]
   onClose: () => void
@@ -31,7 +30,7 @@ interface FacetSelectionCheckProps {
 }
 
 export function FacetSelectionCheck ({ facet, className, isSelected, onSelection } : FacetSelectionCheckProps) {
-  const facetId = 'facet_' + facet.val
+  const facetId = 'facet_' + facet.val;
 
   return (
     <Checkbox.Root
@@ -50,27 +49,23 @@ export function FacetSelectionCheck ({ facet, className, isSelected, onSelection
         {facet.val}
       </Label.Root>
     </Checkbox.Root>
-  )
+  );
 }
 
-export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, selectedFacets, facets, onClose, onSelection }: FacetSelectionAreaProps) {
-  const [filterSearchText, setFilterSearchText] = useState('')
-  const [page, setPage] = useState(1)
-  const throttledFilterSearchText = useThrottle(filterSearchText, 100)
+export default function FacetSelectionArea({ facetGroup, facetsPerPage, selectedFacets, facets, onClose, onSelection }: FacetSelectionAreaProps) {
+  const [filterSearchText, setFilterSearchText] = useState('');
+  const [page, setPage] = useState(1);
+  const throttledFilterSearchText = useThrottle(filterSearchText, 100);
 
   const currentFilteredList = useMemo(() => {
     const searchFilteredList = facets.filter(facet => {
-      return (facet.val + '').toLowerCase().trim().includes(throttledFilterSearchText.trim().toLowerCase())
-    })
+      return (facet.val + '').toLowerCase().trim().includes(throttledFilterSearchText.trim().toLowerCase());
+    });
 
-    return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage)
-  }, [facets, throttledFilterSearchText, page, facetsPerPage, selectedFacets])
+    return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage);
+  }, [facets, throttledFilterSearchText, page, facetsPerPage, selectedFacets]);
 
-  if (!isOpen) {
-    return (<></>)
-  }
-
-  const totalPages = facets.length / facetsPerPage
+  const totalPages = facets.length / facetsPerPage;
 
   return (
     <div className="p-5 bg-white border-2 border-black mt-5">
@@ -85,8 +80,8 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
                 value={filterSearchText}
                 className="border-2 border-black w-full md:w-80 ml-2 font-serif italic text-lg p-3 inline-block"
                 onChange={event => {
-                  setFilterSearchText(event.target.value)
-                  setPage(1)
+                  setFilterSearchText(event.target.value);
+                  setPage(1);
                 }}
               />
               <div className="ml-5"></div>
@@ -96,9 +91,9 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
           <button
             className="text-2xl border-2 border-black p-2"
             onClick={event => {
-              event.preventDefault()
+              event.preventDefault();
 
-              onSelection(facetGroup, [])
+              onSelection(facetGroup, []);
             }}>
             Clear
           </button>
@@ -106,10 +101,10 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
         <button
           className=""
           onClick={event => {
-            event.preventDefault()
+            event.preventDefault();
 
-            setPage(1)
-            onClose()
+            setPage(1);
+            onClose();
           }}
         >
           <Image src={xIcon} alt="Close" />
@@ -126,10 +121,10 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
                 facet={facet}
                 isSelected={true}
                 onSelection={(isChecked) => {
-                  onSelection(facetGroup, selectedFacets.filter(f => f.val != facet.val))
+                  onSelection(facetGroup, selectedFacets.filter(f => f.val != facet.val));
                 }}
               />
-            )
+            );
           })}
         </div>
 
@@ -137,8 +132,8 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
       {page > 1 && (
         <div className="flex justify-center mt-8 animate-bounce">
           <button onClick={event => {
-            event.preventDefault()
-            setPage(page - 1)
+            event.preventDefault();
+            setPage(page - 1);
           }}>
             <Image src={upIcon} alt="Previous page" />
           </button>
@@ -157,7 +152,7 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
         )}
         {currentFilteredList.map((facet) => {
           if(selectedFacets.includes(facet)) {
-            return <></>
+            return <></>;
           }
 
           return (
@@ -167,24 +162,24 @@ export default function FacetSelectionArea({ isOpen, facetGroup, facetsPerPage, 
               facet={facet}
               isSelected={false}
               onSelection={(isChecked) => {
-                const newFacetSelection = [...selectedFacets]
-                newFacetSelection.push(facet)
-                onSelection(facetGroup, newFacetSelection)
+                const newFacetSelection = [...selectedFacets];
+                newFacetSelection.push(facet);
+                onSelection(facetGroup, newFacetSelection);
               }}
             />
-          )
+          );
         })}
       </div>
       {page < totalPages && (
         <div className="flex justify-center mt-5 animate-bounce">
           <button onClick={event => {
-            event.preventDefault()
-            setPage(page + 1)
+            event.preventDefault();
+            setPage(page + 1);
           }}>
             <Image src={downIcon} alt="Next page" />
           </button>
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import { GetServerSideProps, NextPage } from 'next'
-import ViewPlayer from '../../components/View/ViewPlayer'
-import { getItemMetadata, Metadata } from '../../inc/Archive/Metadata'
+import { GetServerSideProps, NextPage } from 'next';
+import ViewPlayer from '../../components/View/ViewPlayer';
+import { getItemMetadata, Metadata } from '../../inc/Archive/Metadata';
 
 interface ViewProps {
   identifier: string
@@ -8,35 +8,37 @@ interface ViewProps {
 }
 
 const View: NextPage<ViewProps> = ({ identifier, metadata }: ViewProps) => {
-
-  getItemMetadata(identifier).then(data => {
-    console.log(data)
-  })
-
   return (
     <>
-      {metadata ? (
-        <ViewPlayer metadata={metadata} />
-      ) : (
-        <div>
-          Cannot initialize viewplayer.
+      <div>
+        <h1 className="text-5xl pb-10 italic font-bold text-center">
+          {metadata?.metadata.title}
+        </h1>
+        <div className="border-t-2 border-black py-5">
+          {metadata ? (
+            <ViewPlayer metadata={metadata} />
+          ) : (
+            <div>
+              Cannot initialize viewplayer.
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </>
-  )
-}
+  );
+};
 
 export const getServerSideProps: GetServerSideProps<ViewProps> = async (context) => {
-  const identifier = context.query.identifier as string
+  const identifier = context.query.identifier as string;
 
-  const metadata = await getItemMetadata(identifier)
+  const metadata = await getItemMetadata(identifier);
 
   return {
     props: {
       identifier,
       metadata,
     }
-  }
-}
+  };
+};
 
-export default View
+export default View;

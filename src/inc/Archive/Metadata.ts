@@ -1,4 +1,4 @@
-import { MediaType } from './Archive'
+import { MediaType } from './Archive';
 
 export enum FileFormat {
   ImageContainerPDF = 'Image Container PDF',
@@ -67,12 +67,12 @@ export interface Metadata {
 }
 
 export async function getItemMetadata(identifier: string): Promise<Metadata | null> {
-  const request = await fetch(`https://archive.org/metadata/${identifier}`)
-  const data = await request.json()
+  const request = await fetch(`https://archive.org/metadata/${identifier}`);
+  const data = await request.json();
 
   if (!data) {
-    return null
+    return null;
   }
 
-  return data as Metadata
+  return data as Metadata;
 }

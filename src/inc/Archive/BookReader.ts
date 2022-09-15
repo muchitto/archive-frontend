@@ -1,5 +1,5 @@
-import path from 'path'
-import { File, FileFormat, Metadata } from './Metadata'
+import path from 'path';
+import { File, FileFormat, Metadata } from './Metadata';
 
 export interface BookReaderPageData {
   height: number
@@ -18,7 +18,7 @@ export enum BookType {
   Kindle = 'Kindle'
 }
 
-export type BookReaderBookSpread = [BookReaderPageData, BookReaderPageData?]
+export type BookReaderBookSpread = [BookReaderPageData, BookReaderPageData?];
 
 export interface BookReaderInfo {
   brOptions: {
@@ -85,49 +85,55 @@ export interface BookReaderInfo {
   metadata: Metadata
 }
 
-type BookReaderResult = { data: BookReaderInfo }
+type BookReaderResult = { data: BookReaderInfo };
 
-export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promise<BookReaderResult | null> {
-  const url = new URL(`https://${metadata.server}/BookReader/BookReaderJSIA.php`)
-  url.searchParams.set('id', metadata.metadata.identifier)
-  url.searchParams.set('itemPath', metadata.dir)
-  url.searchParams.set('server', metadata.server)
-  url.searchParams.set('format', 'json')
-  url.searchParams.set('requestUri', `/details/${metadata.metadata.identifier}`)
+export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promise<BookReaderInfo | null> {
+  const url = new URL(`https://${metadata.server}/BookReader/BookReaderJSIA.php`);
+  url.searchParams.set('id', metadata.metadata.identifier);
+  url.searchParams.set('itemPath', metadata.dir);
+  url.searchParams.set('server', metadata.server);
+  url.searchParams.set('format', 'jsonp');
 
-  const file = getItemMetadataFirstFile(metadata)
+  const file = getItemMetadataFirstFile(metadata);
 
   if(!file || !file.name) {
-    return null
+    return null;
   }
 
-  const filename = path.parse(file.name)
+  const filename = path.parse(file.name);
 
-  url.searchParams.set('subPrefix', filename.name)
+  url.searchParams.set('subPrefix', `${filename.dir}/${filename.name}`.replace(/^\//, ''));
+  url.searchParams.set('requestUri', `/details/${metadata.metadata.identifier}`);
 
-  const request = await fetch(url)
+  const request = await fetch(url.toString());
 
-  if(!request) {
-    return null
+  if(request.status != 200) {
+    return null;
   }
 
-  return await request.json() as BookReaderResult
+  const result = await request.json() as BookReaderResult;
+
+  if(!result) {
+    return null;
+  }
+
+  return result.data;
 }
 
 export function getItemMetadataFirstFile(metadata: Metadata) {
   if(metadata.files.length == 0) {
-    return null
+    return null;
   }
 
-  return metadata.files[0]
+  return metadata.files[0];
 }
 
 export function getItemMetadataWithFormat(metadata: Metadata, format: FileFormat) : File | null {
-  const file = metadata.files.find(file => file.format == format)
+  const file = metadata.files.find(file => file.format == format);
 
   if(!file) {
-    return null
+    return null;
   }
 
-  return file
+  return file;
 }

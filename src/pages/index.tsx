@@ -1,4 +1,4 @@
-import type { GetServerSideProps, NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next';
 
 interface HomeProps {
 }
@@ -10,13 +10,18 @@ const Home: NextPage<HomeProps> = ({}: HomeProps) => {
       <div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
 
 export const getServerSideProps : GetServerSideProps<HomeProps> = async (context) => {
   return {
-    props: {}
-  }
-}
+    redirect: {
+      destination: '/search',
+      statusCode: 307
+    },
+    props: {
+    }
+  };
+};

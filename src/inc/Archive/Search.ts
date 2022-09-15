@@ -1,4 +1,4 @@
-import { MediaType } from './Archive'
+import { MediaType } from './Archive';
 
 export interface SearchResult {
   responseHeader: {
@@ -47,7 +47,7 @@ export interface Doc {
 
 export type FacetGroupSelections = {
   [key: string]: Facet[]
-}
+};
 
 export interface SearchQueryDetail {
   any: string
@@ -119,135 +119,135 @@ export const facetTypeList: { [key: string]: FacetGroup } = {
     name: 'Language',
     idName: 'languageSorter',
   },
-}
+};
 
 export function queryDetailFormatter(data: SearchQueryDetail) {
-  let q = `(${data.any})`
+  let q = `(${data.any})`;
 
   for (const key in data.facets) {
-    const facetList = data.facets[key]
+    const facetList = data.facets[key];
 
     if (facetList.length == 0) {
-      continue
+      continue;
     }
 
     if (q.length > 0) {
-      q += ' AND '
+      q += ' AND ';
     }
 
-    let localq = ''
+    let localq = '';
     for (const facet of data.facets[key]) {
       if (localq.length > 0) {
-        localq += ' OR '
+        localq += ' OR ';
       }
 
-      localq += `${key}:(${facet.val})`
+      localq += `${key}:(${facet.val})`;
     }
 
     if (data.facets[key].length > 1) {
-      q += `(${localq})`
+      q += `(${localq})`;
     } else {
-      q += localq
+      q += localq;
     }
   }
 
-  return encodeURIComponent(q)
+  return encodeURIComponent(q);
 }
 
 export async function fetchFacets(
   query: CategoryQuery
 ): Promise<FacetSearchResult | null> {
-  const searchURL = `https://archive.org/search.php?query=${query.any}&morf=${query.facet}&headless=1&facets_xhr=facets&output=json`
+  const searchURL = `https://archive.org/search.php?query=${query.any}&morf=${query.facet}&headless=1&facets_xhr=facets&output=json`;
 
-  const fetchedFacets = await fetch(searchURL)
-  const result = (await fetchedFacets.json()) as FacetSearchResult
+  const fetchedFacets = await fetch(searchURL);
+  const result = (await fetchedFacets.json()) as FacetSearchResult;
 
-  return result
+  return result;
 }
 
 export async function convertFacetResultToPretty(
   query: CategoryQuery,
   result: FacetSearchResult
 ) {
-  const facetGroup = facetTypeList[query.facet]
+  const facetGroup = facetTypeList[query.facet];
 
   const facetList = result.options.map((facet) => {
-    facet.group = facetGroup
-    return facet
-  })
+    facet.group = facetGroup;
+    return facet;
+  });
 
   const facetResultPretty: FacetSearchResultPretty = {
     facetGroup: facetGroup,
     facets: facetList,
-  }
+  };
 
-  return facetResultPretty
+  return facetResultPretty;
 }
 
 export async function fetchFacetsPretty(
   query: CategoryQuery
 ): Promise<FacetSearchResultPretty | null> {
-  const results = await fetchFacets(query)
+  const results = await fetchFacets(query);
 
   if (!results) {
-    return null
+    return null;
   }
 
-  return convertFacetResultToPretty(query, results)
+  return convertFacetResultToPretty(query, results);
 }
 
 export async function fetchAllFacetsPretty(
   any: string
 ): Promise<FacetSearchResultPretty[] | null> {
-  const facetResultList: FacetSearchResultPretty[] = []
+  const facetResultList: FacetSearchResultPretty[] = [];
 
   for (const facetTypeId of Object.keys(facetTypeList)) {
-    const facetGroup = facetTypeList[facetTypeId]
+    const facetGroup = facetTypeList[facetTypeId];
 
     try {
       const facetListPretty = await fetchFacetsPretty({
         any,
         facet: facetGroup.idName,
-      })
+      });
 
       if (!facetListPretty) {
         console.log(
           `could not fetch facets with facet group id ${facetGroup.idName}`
-        )
-        continue
+        );
+        continue;
       }
 
-      facetResultList.push(facetListPretty as FacetSearchResultPretty)
+      facetResultList.push(facetListPretty as FacetSearchResultPretty);
     } catch (error) {
       console.log(
         `could not fetch facets with facet group id ${facetGroup.idName}`
-      )
+      );
     }
   }
 
-  return facetResultList
+  return facetResultList;
 }
 
 export async function fetchDataWithQuery(
   query: SearchQuery
 ): Promise<SearchResult | null> {
   if (!query.query.any) {
-    return null
+    return null;
   }
 
-  const newURL = getAvancedSearchURL(query)
+  const newURL = getAvancedSearchURL(query);
 
-  const data = await fetch(newURL)
+  const data = await fetch(newURL);
 
-  return await data.json()
+  return await data.json();
 }
 
 export const getAvancedSearchURL = (query: SearchQuery) =>  {
-  const newURL = new URL('https://archive.org/advancedsearch.php')
-  newURL.searchParams.set('rows', query.rows + '')
-  newURL.searchParams.set('page', query.page + '')
-  newURL.searchParams.set('output', (query.output ?? 'json') + '')
-  newURL.searchParams.set('q', queryDetailFormatter(query.query))
+  const newURL = new URL('https://archive.org/advancedsearch.php');
+  newURL.searchParams.set('rows', query.rows + '');
+  newURL.searchParams.set('page', query.page + '');
+  newURL.searchParams.set('output', (query.output ?? 'json') + '');
+  newURL.searchParams.set('q', queryDetailFormatter(query.query));
 
-  return decodeURI(newURL.toString())
-}
+  return decodeURI(newURL.toString());
+};

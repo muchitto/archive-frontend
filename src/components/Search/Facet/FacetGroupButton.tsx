@@ -1,7 +1,7 @@
-import Image from 'next/future/image'
-import { FacetGroup } from '../../../inc/Archive/Search'
+import Image from 'next/future/image';
+import { FacetGroup } from '../../../inc/Archive/Search';
 
-import refreshCWIcon from '../../../assets/icons/refresh-cw.svg'
+import refreshCWIcon from '../../../assets/icons/refresh-cw.svg';
 
 interface FacetGroupButtonProps {
   facetGroup: FacetGroup
@@ -24,16 +24,16 @@ export default function FacetGroupButton({ facetGroup, className, totalFacetCoun
     'enabled:hover:shadow-btn',
     'enabled:hover:bg-amber-100',
     className
-  ]
+  ];
 
-  const isDisabled = isLoading || totalFacetCount == 0
+  const isDisabled = isLoading || totalFacetCount == 0;
 
   if (!isLoading && totalFacetCount == 0) {
-    classes.push('border-dashed')
+    classes.push('border-dashed');
   } else if (isError) {
-    classes.push('animation-pulse bg-red-400')
+    classes.push('animation-pulse bg-red-400');
   } else if (isOpened) {
-    classes.push('shadow-btn bg-yellow-200')
+    classes.push('shadow-btn bg-yellow-200');
   }
 
   return (
@@ -42,8 +42,8 @@ export default function FacetGroupButton({ facetGroup, className, totalFacetCoun
       disabled={isDisabled}
       className={classes.join(' ')}
       onClick={async (event) => {
-        event.preventDefault()
-        onToggle(isOpened)
+        event.preventDefault();
+        onToggle(isOpened);
       }}>
       <label className="cursor-pointer">
         {facetGroup.name}
@@ -57,5 +57,5 @@ export default function FacetGroupButton({ facetGroup, className, totalFacetCoun
         <Image src={refreshCWIcon} className="animate-spin w-6 ml-5" alt="Loading" priority={true} />
       )}
     </button>
-  )
+  );
 }
