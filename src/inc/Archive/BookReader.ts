@@ -94,7 +94,7 @@ export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promis
   url.searchParams.set('server', metadata.server);
   url.searchParams.set('format', 'jsonp');
 
-  const file = getItemMetadataFirstFile(metadata);
+  const file = getBookReaderFileFromMetadata(metadata);
 
   if(!file || !file.name) {
     return null;
@@ -120,12 +120,21 @@ export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promis
   return result.data;
 }
 
-export function getItemMetadataFirstFile(metadata: Metadata) {
+export function getBookReaderFileFromMetadata(metadata: Metadata) {
   if(metadata.files.length == 0) {
     return null;
   }
 
-  return metadata.files[0];
+  const files = metadata.files.filter(f =>
+    [
+      FileFormat.SignlePageProcessedJP2Zip,
+      FileFormat.ImageContainerPDF,
+      FileFormat.ComicBookRAR,
+      FileFormat.TextPDF,
+    ].includes(f.format)
+  );
+
+  return files[0];
 }
 
 export function getItemMetadataWithFormat(metadata: Metadata, format: FileFormat) : File | null {

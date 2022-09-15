@@ -15,6 +15,8 @@ interface BookReaderProps {
 }
 
 export default function BookReader ({ metadata }: BookReaderProps) {
+  console.log(metadata);
+
   const [pageSpread, setPageSpread] = useState(0);
   const [currentSpread, setCurrentSpread] = useState(null as BookReaderBookSpread | null);
 
@@ -28,8 +30,9 @@ export default function BookReader ({ metadata }: BookReaderProps) {
       .then(res => res.json())
       .then(data => data as BookReaderInfo | null), { retry: true });
 
+  const currentPageNumber = Math.max(1, pageSpread * 2);
   const totalPages = (data) ? data.brOptions.data.flat().length : 0;
-  const hasMoreSpreads = (data) ? data.brOptions.data.length > pageSpread : false;
+  const hasMoreSpreads = totalPages > currentPageNumber;
 
   useEffect(() => {
     if(!isFetching && data) {
@@ -57,10 +60,10 @@ export default function BookReader ({ metadata }: BookReaderProps) {
     <div>
       {data && (
         <div className="text-center text-xl font-bold pb-4">
-          Page: {Math.max(1, pageSpread * 2)} / {totalPages}
+          Page: {currentPageNumber} / {totalPages}
         </div>
       )}
-      {hasMoreSpreads && currentSpread && (
+      {currentSpread && currentPageNumber > 0 && (
         <div>
           {pageSpread > 0 && (
             <PageButton
