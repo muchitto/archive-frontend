@@ -12,7 +12,6 @@ import downIcon from '../../../assets/icons/down.svg';
 import checkSquareIcon from '../../../assets/icons/check-square.svg';
 import squareIcon from '../../../assets/icons/square.svg';
 
-
 interface FacetSelectionAreaProps {
   facets: Facet[]
   facetGroup: FacetGroup
@@ -30,8 +29,6 @@ interface FacetSelectionCheckProps {
 }
 
 export function FacetSelectionCheck ({ facet, className, isSelected, onSelection } : FacetSelectionCheckProps) {
-  const facetId = 'facet_' + facet.val;
-
   return (
     <Checkbox.Root
       checked={isSelected}
@@ -63,7 +60,7 @@ export default function FacetSelectionArea({ facetGroup, facetsPerPage, selected
     });
 
     return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage);
-  }, [facets, throttledFilterSearchText, page, facetsPerPage, selectedFacets]);
+  }, [facets, throttledFilterSearchText, page, facetsPerPage]);
 
   const totalPages = facets.length / facetsPerPage;
 

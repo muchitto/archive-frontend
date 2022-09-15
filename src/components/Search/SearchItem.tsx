@@ -13,7 +13,7 @@ export const MediaTypeIcons : { [key: string] : string } = {
   'audio': 'volume.svg'
 };
 
-export default function ResultItem({pos, doc }: SearchItemProps) {
+export default function ResultItem({ doc }: SearchItemProps) {
   const imageURL = `http://archive.org/services/img/${doc.identifier}`;
 
   return (
