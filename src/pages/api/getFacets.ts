@@ -27,5 +27,6 @@ export default async function handler(
     };
   }
 
+  res.setHeader('Cache-control', `public, s-maxage=${2 * 60 * 60}`);
   res.status(200).json(output);
 }

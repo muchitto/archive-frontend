@@ -1,45 +1,52 @@
+import { useQuery } from '@tanstack/react-query';
 import { GetServerSideProps, NextPage } from 'next';
-import Regular from '../../components/Layouts/Regular';
+import Loader from '../../components/Common/Loader';
+import RegulerLayout from '../../components/Layouts/Regular';
 import ViewPlayer from '../../components/View/ViewPlayer';
-import { getItemMetadata, Metadata } from '../../inc/Archive/Metadata';
+import { Metadata } from '../../inc/Archive/Metadata';
 
 interface ViewProps {
   identifier: string
-  metadata: Metadata | null
 }
 
-const View: NextPage<ViewProps> = ({ identifier, metadata }: ViewProps) => {
+const View: NextPage<ViewProps> = ({ identifier }: ViewProps) => {
+  const { isFetching, data: metadata } = useQuery(['metadata', identifier], () => (
+    fetch(`/api/getMetadata?identifier=${identifier}`)
+      .then(async data => await data.json() as Metadata | null)
+  ));
+
   return (
-    <Regular title={metadata?.metadata.title}>
-      <div>
-        <h1 className="text-5xl pb-10 italic font-bold text-center">
-          {metadata?.metadata.title}
-        </h1>
-        <div className="border-t-2 border-black py-5">
-          {metadata ? (
-            <ViewPlayer metadata={metadata} />
-          ) : (
-            <div>
+    <RegulerLayout title={metadata?.metadata.title}>
+      <Loader isLoading={isFetching} text="Fetching metadata">
+        <div>
+          <h1 className="text-5xl pb-10 italic font-bold text-center">
+            {metadata?.metadata.title}
+          </h1>
+          {!isFetching && metadata && (
+            <div className="border-t-2 border-black py-5">
+              {metadata ? (
+                <ViewPlayer metadata={metadata} />
+              ) : (
+                <div>
               Cannot initialize viewplayer.
+                </div>
+              )}
             </div>
           )}
         </div>
-      </div>
-    </Regular>
+      </Loader>
+    </RegulerLayout>
   );
 };
 
-export const getServerSideProps: GetServerSideProps<ViewProps> = async (context) => {
-  const identifier = context.query.identifier as string;
+export default View;
 
-  const metadata = await getItemMetadata(identifier);
+export const getServerSideProps : GetServerSideProps<ViewProps> = async (context) => {
+  const identifier = context.query.identifier as string ?? '';
 
   return {
     props: {
-      identifier,
-      metadata,
+      identifier
     }
   };
 };
-
-export default View;

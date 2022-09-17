@@ -1,5 +1,4 @@
-import path from 'path';
-import { File, FileFormat, Metadata } from './Metadata';
+import { File, FileFormat, getItemMetadata, Metadata } from './Metadata';
 
 export interface BookReaderPageData {
   height: number
@@ -20,7 +19,7 @@ export enum BookType {
 
 export type BookReaderBookSpread = [BookReaderPageData, BookReaderPageData?];
 
-export interface BookReaderInfo {
+export interface BookReaderData {
   brOptions: {
     bookId: string
     bookPath: string
@@ -85,25 +84,42 @@ export interface BookReaderInfo {
   metadata: Metadata
 }
 
-type BookReaderResult = { data: BookReaderInfo };
+export interface BookReaderBookInfo {
+  title: string
+  date: string
+  language: string
+  collection: string
+  pageProgression: 'lr' | 'rl'
+  ppi: number
+  numPages: number
+  titleLeaf: number
+  titleIndex: number
+  url: string
+  pageWidths: number[]
+  pageHeights: number[]
+  pageNums: number[]
+  itemId: string
+  subPrefix: string
+  itemPath: string
+  zip: string
+  server: string
+  imageFormat: string
+  archiveFormat: string
+  leafNums: number[]
+  previewImage: string
+  titleImage: string
+}
 
-export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promise<BookReaderInfo | null> {
-  const url = new URL(`https://${metadata.server}/BookReader/BookReaderJSIA.php`);
-  url.searchParams.set('id', metadata.metadata.identifier);
+export interface BookReaderTotalData {
+  info: BookReaderBookInfo
+  data: BookReaderData
+}
+
+export async function getBookReaderBookInfo(metadata: Metadata) : Promise<BookReaderBookInfo | null> {
+  const url = new URL(`https://${metadata.server}/BookReader/BookReaderJSON.php`);
+  url.searchParams.set('itemId', metadata.metadata.identifier);
   url.searchParams.set('itemPath', metadata.dir);
   url.searchParams.set('server', metadata.server);
-  url.searchParams.set('format', 'jsonp');
-
-  const file = getBookReaderFileFromMetadata(metadata);
-
-  if(!file || !file.name) {
-    return null;
-  }
-
-  const filename = path.parse(file.name);
-
-  url.searchParams.set('subPrefix', `${filename.dir}/${filename.name}`.replace(/^\//, ''));
-  url.searchParams.set('requestUri', `/details/${metadata.metadata.identifier}`);
 
   const request = await fetch(url.toString());
 
@@ -111,30 +127,73 @@ export async function getBookReaderDataWithMetadata(metadata: Metadata) : Promis
     return null;
   }
 
-  const result = await request.json() as BookReaderResult;
+  const result = await request.json() as BookReaderBookInfo;
 
   if(!result) {
     return null;
   }
 
-  return result.data;
+  return result;
 }
 
-export function getBookReaderFileFromMetadata(metadata: Metadata) {
-  if(metadata.files.length == 0) {
+export async function getBookReaderBookData (info: BookReaderBookInfo) {
+  const url = new URL(`https://${info.server}/BookReader/BookReaderJSIA.php`);
+  url.searchParams.set('id', info.itemId);
+  url.searchParams.set('itemPath', info.itemPath);
+  url.searchParams.set('server', info.server);
+  url.searchParams.set('format', 'jsonp');
+  url.searchParams.set('subPrefix', info.subPrefix);
+  url.searchParams.set('requestUri', `/details/${info.itemId}`);
+
+  const request = await fetch(url.toString());
+
+  if(request.status != 200) {
     return null;
   }
 
-  const files = metadata.files.filter(f =>
-    [
-      FileFormat.SignlePageProcessedJP2Zip,
-      FileFormat.ImageContainerPDF,
-      FileFormat.ComicBookRAR,
-      FileFormat.TextPDF,
-    ].includes(f.format)
-  );
+  const result = await request.json();
 
-  return files[0];
+  if(!result) {
+    return null;
+  }
+
+  return result.data as BookReaderData;
+}
+
+export async function getAllBookReaderDataWithIdentifier(identifier: string) {
+
+  const metadata = await getItemMetadata(identifier);
+
+  if(!metadata) {
+    return null;
+  }
+
+  const allBookReaderData = await getAllBookReaderData(metadata);
+
+  if(!allBookReaderData) {
+    return null;
+  }
+
+  return allBookReaderData;
+}
+
+export async function getAllBookReaderData(metadata: Metadata) : Promise<BookReaderTotalData | null> {
+  const info = await getBookReaderBookInfo(metadata);
+
+  if(!info) {
+    return null;
+  }
+
+  const data = await getBookReaderBookData(info);
+
+  if(!data) {
+    return null;
+  }
+
+  return {
+    data,
+    info
+  };
 }
 
 export function getItemMetadataWithFormat(metadata: Metadata, format: FileFormat) : File | null {

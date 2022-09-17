@@ -1,4 +1,4 @@
-import { atom, useAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { GetServerSideProps, NextPage } from 'next';
 import Image from 'next/future/image';
 import { useRouter } from 'next/router';
@@ -7,29 +7,27 @@ import FacetArea, { useFacetPanelOpenAtom } from '../components/Search/Facet/Fac
 import PageButton from '../components/Common/PageButton';
 import { Facet, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchQuery, SearchResult } from '../inc/Archive/Search';
 import config from '../inc/Config';
-import { useDebounce, useInitialized, useRunOnce } from '../inc/hooks';
+import { useDebounce, useInitialized, useRunOnce } from '../inc/Hooks';
 import { useQuery } from '@tanstack/react-query';
 
 import refreshCWIcon from '../assets/icons/refresh-cw.svg';
 import leftIcon from '../assets/icons/left.svg';
 import rightIcon from '../assets/icons/right.svg';
 import SearchResults from '../components/Search/SearchResults';
-import Regular from '../components/Layouts/Regular';
+import RegulerLayout from '../components/Layouts/Regular';
+import Loader from '../components/Common/Loader';
 
 interface SearchProps {
   initialQuery: SearchQuery
   initialResults: SearchResult | null
 }
 
-enum PageDirection {
+export enum PageDirection {
   Previous,
   Next
 }
 
-const first = atom({} as SearchResult | null);
-
 const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchProps) => {
-  const [lastResult, setLastResult] = useAtom(first);
   const [page, setPage] = useState(initialQuery.page);
   const [rows, setRows] = useState(initialQuery.rows);
   const [isFacetPanelOpen, setIsFacetPanelOpen] = useAtom(useFacetPanelOpenAtom);
@@ -123,7 +121,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
   }
 
   return (
-    <Regular title='Search'>
+    <RegulerLayout title='Search'>
       <div>
         {!isChangingPage && isFetching && isFacetPanelOpen && (
           <div className="fixed top-5 right-5">
@@ -169,74 +167,46 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
         )}
 
         <div className="py-5">
-          {!isChangingPage && isFetching && (
-            <div className="text-2xl font-bold uppercase p-5 flex justify-center">
-              <Image src={refreshCWIcon} className="animate-spin" width="100" height="100" alt="Loading..." priority={true} />
-            </div>
-          )}
-          {currentStatusText && (
-            <div className="text-3xl uppercase font-bold">
-              {currentStatusText}
-            </div>
-          )}
-          {data && data.response?.docs.length > 0 && (
-            <SearchResults page={page} rows={rows} result={data}/>
-          )}
+          <Loader isLoading={!isChangingPage && isFetching} text="Fetching search results...">
+            {currentStatusText && (
+              <div className="text-3xl uppercase font-bold">
+                {currentStatusText}
+              </div>
+            )}
+            {data && data.response?.docs.length > 0 && (
+              <SearchResults page={page} rows={rows} result={data}/>
+            )}
+          </Loader>
         </div>
 
         {(isChangingPage || (page > 1 && haveResults)) && (
           <PageButton
             className="fixed inset-y-1/2 left-4"
-            textTop="Prev"
-            textBottom="Page"
-            showText={!usedPageButtons}
-            content={
-              (pageChangeDirection == PageDirection.Previous) ?
-                (
-                  <Image
-                    src={refreshCWIcon}
-                    alt="Loading previous page"
-                    className="animate-spin mt-2 ml-2"
-                    width="35"
-                    height="35"
-                  />
-                )
-                :
-                (
-                  <Image src={leftIcon} alt="Previous page" />
-                )}
+            textTop={!usedPageButtons ? 'Previous' : ''}
+            textBottom={!usedPageButtons ? 'Page' : ''}
+            showLoader={pageChangeDirection == PageDirection.Previous}
             onClick={() => {
               prevPage();
             }}
-          />
+          >
+            <Image src={leftIcon} alt="Previous page" />
+          </PageButton>
         )}
         {(isChangingPage || haveMoreResults) && (
           <PageButton
             className="fixed inset-y-1/2 right-4"
-            textTop="Next"
-            textBottom="Page"
-            showText={!usedPageButtons}
-            content={pageChangeDirection == PageDirection.Next ?
-              (
-                <Image
-                  src={refreshCWIcon}
-                  alt="Loading next page"
-                  className="animate-spin mt-2 ml-2"
-                  width="35"
-                  height="35"
-                />
-              )
-              : (
-                <Image src={rightIcon} alt="Next page" />
-              )
-            }
-            onClick={(event) => {
+            textTop={!usedPageButtons ? 'Next' : ''}
+            textBottom={!usedPageButtons ? 'Page' : ''}
+            showLoader={pageChangeDirection == PageDirection.Next}
+            onClick={() => {
               nextPage();
             }}
-          />
+          >
+            <Image src={rightIcon} alt="Next page" />
+          </PageButton>
         )}
       </div>
-    </Regular>
+    </RegulerLayout>
   );
 };
 

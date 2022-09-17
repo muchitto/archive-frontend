@@ -1,6 +1,5 @@
 import Image from 'next/future/image';
 import { useEffect, useState } from 'react';
-import { BookReaderBookSpread, BookReaderInfo } from '../../../inc/Archive/BookReader';
 import { Metadata } from '../../../inc/Archive/Metadata';
 import PageButton from '../../Common/PageButton';
 
@@ -8,111 +7,112 @@ import leftIcon from '../../../assets/icons/left.svg';
 import rightIcon from '../../../assets/icons/right.svg';
 import { useQuery } from '@tanstack/react-query';
 
-import refreshCW from '../../../assets/icons/refresh-cw.svg';
+import { BookReaderBookSpread, BookReaderTotalData } from '../../../inc/Archive/BookReader';
+import Loader from '../../Common/Loader';
+import { PageDirection } from '../../../pages/search';
 
 interface BookReaderProps {
   metadata: Metadata
 }
 
-export default function BookReader ({ metadata }: BookReaderProps) {
-  console.log(metadata);
-
-  const [pageSpread, setPageSpread] = useState(0);
+export default function BookReader({ metadata }: BookReaderProps) {
   const [currentSpread, setCurrentSpread] = useState(null as BookReaderBookSpread | null);
-
-  const pageL = (currentSpread) ?  currentSpread[0] : null;
-  const pageR = (currentSpread && currentSpread[1]) ? currentSpread[1] : null;
+  const [spreadNumber, setSpreadNumber] = useState(0);
+  const [loadingPage, setLoadingPage] = useState(null as PageDirection | null);
 
   const identifier = metadata.metadata.identifier;
 
-  const { isFetching, data } = useQuery(['bookReaderData', identifier], async () =>
+  useEffect(() => {
+    const url = new URL(location.href);
+    const spread = url.searchParams.get('spread');
+
+    if(spread) {
+      setSpreadNumber(parseInt(spread));
+    }
+  }, []);
+
+  const { isFetching, data : bookReaderData } = useQuery(['bookReaderData', identifier], async () =>
     fetch(`/api/getBookReaderData?identifier=${identifier}`)
       .then(res => res.json())
-      .then(data => data as BookReaderInfo | null), { retry: true });
+      .then(data => data as BookReaderTotalData | null)
+      .then(data => {
+        if(data?.data.brOptions.data && data?.data.brOptions.data.length > 0) {
+          setCurrentSpread(data.data.brOptions.data[0]);
+        }
 
-  const currentPageNumber = Math.max(1, pageSpread * 2);
-  const totalPages = (data) ? data.brOptions.data.flat().length : 0;
-  const hasMoreSpreads = totalPages > currentPageNumber;
+        return data;
+      }),
+  {
+    retry: true
+  });
 
   useEffect(() => {
-    if(!isFetching && data) {
-      setCurrentSpread(data.brOptions.data[pageSpread]);
+    if(bookReaderData?.data.brOptions.data) {
+      setCurrentSpread(bookReaderData?.data.brOptions.data[spreadNumber]);
     }
-  }, [data, pageSpread]);
+  }, [spreadNumber]);
 
-  if(isFetching) {
-    return (
-      <div>
-        <Image src={refreshCW} className="animate-spin" width="100" height="100" alt="Loading page..." />
-      </div>
-    );
-  }
-
-  if(!currentSpread) {
-    return (
-      <div>
-        Cannot show this spread
-      </div>
-    );
-  }
+  const spreads = (bookReaderData) ? bookReaderData.data.brOptions.data : [];
+  const totalSpreads = spreads.length;
+  const hasMorePages = totalSpreads > spreadNumber + 1;
+  const pageL = (currentSpread) ? currentSpread[0] : null;
+  const pageR = (currentSpread && currentSpread.length > 1) ? currentSpread[1] : null;
+  const pageLeftURL = (currentSpread) ? currentSpread[0].uri : null;
+  const pageRightURL = (currentSpread && currentSpread.length > 1) ? currentSpread[1]?.uri : null;
 
   return (
     <div>
-      {data && (
+      <Loader isLoading={isFetching} text="Fetching pages">
         <div className="text-center text-xl font-bold pb-4">
-          Page: {currentPageNumber} / {totalPages}
+        Page: {spreadNumber + 1} / {totalSpreads}
         </div>
-      )}
-      {currentSpread && currentPageNumber > 0 && (
-        <div>
-          {pageSpread > 0 && (
-            <PageButton
-              className='fixed inset-y-1/2 left-4'
-              showText={true}
-              onClick={() => {
-                setPageSpread(p => p - 1);
-              }}
-              content={
+        {(pageL || pageR) && (
+          <div>
+            {spreadNumber > 0 && (
+              <PageButton
+                className='fixed inset-y-1/2 left-4'
+                onClick={() => {
+                  setSpreadNumber(p => p - 1);
+                  setLoadingPage(PageDirection.Previous);
+                }}
+              >
                 <Image src={leftIcon} alt="Previous page" />
-              }
-              hideTextWhenClick={true}
-            />
-          )}
-          <div className='flex w-full'>
-            {pageL && (
-              <img
-                src={pageL.uri}
-                width={pageL.width}
-                height={pageL.height}
-                alt={'Page'}
-                className="w-1/2"
-              />
+              </PageButton>
             )}
-            {pageR && (
-              <img
-                src={pageR.uri}
-                width={pageR.width}
-                height={pageR.height}
-                alt={'Page'}
-                className="w-1/2"
-              />
+            <div className='flex w-full'>
+              {pageL && pageLeftURL && (
+                <img
+                  src={pageLeftURL}
+                  width={pageL.width}
+                  height={pageL.height}
+                  alt={'Page'}
+                  className="w-1/2"
+                />
+              )}
+              {pageR && pageRightURL && (
+                <img
+                  src={pageRightURL}
+                  width={pageR.width}
+                  height={pageR.height}
+                  alt={'Page'}
+                  className="w-1/2"
+                />
+              )}
+            </div>
+            {hasMorePages && (
+              <PageButton
+                className='fixed inset-y-1/2 right-4'
+                onClick={() => {
+                  setSpreadNumber(p => p + 1);
+                  setLoadingPage(PageDirection.Next);
+                }}
+              >
+                <Image src={rightIcon} alt="Next page" />
+              </PageButton>
             )}
           </div>
-          {hasMoreSpreads && (
-            <PageButton
-              className='fixed inset-y-1/2 right-4'
-              showText={true}
-              onClick={() => {
-                setPageSpread(p => p + 1);
-              }}
-              content={
-                <Image src={rightIcon} alt="Next page" />
-              }
-              hideTextWhenClick={true}
-            />
-          )}
-        </div>
-      )}
+        )}
+      </Loader>
     </div>
   );
 }

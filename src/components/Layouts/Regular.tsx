@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { PropsWithChildren } from 'react';
 import Footer from '../Common/Footer';
 import Header from '../Common/Header';
@@ -8,18 +7,20 @@ interface LayoutProps {
   title?: string
 }
 
-export default function Regular ({children, title} : PropsWithChildren<LayoutProps>) {
-  const router = useRouter();
+export default function RegulerLayout ({children, title} : PropsWithChildren<LayoutProps>) {
   const siteName = 'Archive';
 
+  const titleText = `${siteName}${title ? ` - ${title}` : ''}`;
   return (
-    <div className="container mx-auto max-w-ld rounded-md p-5">
+    <>
       <Head>
-        <title>{siteName}{title ? ` - ${title}` : ''}</title>
+        <title>{titleText}</title>
       </Head>
-      <Header />
-      {children}
-      <Footer />
-    </div>
+      <div className="container mx-auto max-w-ld rounded-md p-5">
+        <Header />
+        {children}
+        <Footer />
+      </div>
+    </>
   );
 }

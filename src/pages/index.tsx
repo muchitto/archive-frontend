@@ -4,7 +4,6 @@ interface HomeProps {
 }
 
 const Home: NextPage<HomeProps> = ({}: HomeProps) => {
-
   return (
     <>
       <div>

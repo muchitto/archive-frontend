@@ -1,7 +1,7 @@
 import Image from 'next/future/image';
 import { useMemo, useState } from 'react';
 import { Facet, FacetGroup } from '../../../inc/Archive/Search';
-import { useThrottle } from '../../../inc/hooks';
+import { useThrottle } from '../../../inc/Hooks';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as Label from '@radix-ui/react-label';
 

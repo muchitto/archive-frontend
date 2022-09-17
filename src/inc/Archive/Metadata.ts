@@ -68,9 +68,14 @@ export interface Metadata {
 
 export async function getItemMetadata(identifier: string): Promise<Metadata | null> {
   const request = await fetch(`https://archive.org/metadata/${identifier}`);
+
+  if (!request) {
+    return null;
+  }
+
   const data = await request.json();
 
-  if (!data) {
+  if(!data) {
     return null;
   }
 

@@ -1,12 +1,14 @@
-import { MouseEvent, useRef } from 'react';
+import Image from 'next/future/image';
+import { MouseEvent, PropsWithChildren, useRef } from 'react';
+
+import refreshCWIcon from '../../assets/icons/refresh-cw.svg';
 
 interface PageButtonProps {
   textTop?: string
   textBottom?: string
-  showText: boolean
   className?: string
   hideTextWhenClick?: boolean
-  content: JSX.Element
+  showLoader?: boolean
   onClick: (event: MouseEvent<HTMLAnchorElement>) => void
 }
 
@@ -14,15 +16,15 @@ export default function PageButton({
   textTop,
   textBottom,
   className,
-  showText,
   hideTextWhenClick,
-  content,
-  onClick
-} : PageButtonProps) {
+  onClick,
+  showLoader,
+  children
+} : PropsWithChildren<PageButtonProps>) {
   const clicked = useRef(false);
   const shouldShowClick = !(hideTextWhenClick && clicked.current);
-  const showTopText = showText && textTop && shouldShowClick;
-  const showBottomText = showText && textBottom && shouldShowClick;
+  const showTopText = textTop && shouldShowClick;
+  const showBottomText = textBottom && shouldShowClick;
 
   return (
     <div className={`${className} text-center text-lg`}>
@@ -34,9 +36,21 @@ export default function PageButton({
         clicked.current = true;
         onClick(event);
       }} className="inline-block">
-        <div className="rounded-full bg-white w-14 h-14 block border-2 border-black hover:shadow-btn">
-          {content}
-        </div>
+
+        {showLoader && (
+          <Image
+            src={refreshCWIcon}
+            alt="Loading next page"
+            className="animate-spin mt-2 ml-2"
+            width="35"
+            height="35"
+          />
+        )}
+        {!showLoader && (
+          <div className="rounded-full bg-white w-14 h-14 block border-2 border-black hover:shadow-btn">
+            {children}
+          </div>
+        )}
       </a>
       <label className={`p-1 block mt-2 ${showBottomText ? 'block' : 'invisible'}`}>
         {textBottom}
