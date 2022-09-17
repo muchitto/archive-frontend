@@ -19,7 +19,7 @@ const View: NextPage<ViewProps> = ({ identifier }: ViewProps) => {
     <RegulerLayout title={metadata?.metadata.title}>
       <Loader isLoading={isFetching} text="Fetching metadata">
         <div>
-          <h1 className="text-5xl pb-10 italic font-bold text-center">
+          <h1 className="text-2xl md:text-3xl lg:text-5xl pb-10 italic font-bold text-center">
             {metadata?.metadata.title}
           </h1>
           {!isFetching && metadata && (

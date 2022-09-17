@@ -60,6 +60,35 @@ export default function BookReader({ metadata }: BookReaderProps) {
   const pageLeftURL = (currentSpread) ? currentSpread[0].uri : null;
   const pageRightURL = (currentSpread && currentSpread.length > 1) ? currentSpread[1]?.uri : null;
 
+  const PageRow = ({dir} : {dir: PageDirection}) => {
+    return (
+      <div className='flex justify-center'>
+        {spreadNumber > 0 && (
+          <PageButton
+            className={`${dir == PageDirection.Previous ? 'lg:hidden' : ''} lg:fixed inline-block inset-y-1/2 left-4`}
+            onClick={() => {
+              setSpreadNumber(p => p - 1);
+              setLoadingPage(PageDirection.Previous);
+            }}
+          >
+            <Image src={leftIcon} alt="Previous page" />
+          </PageButton>
+        )}
+        {hasMorePages && (
+          <PageButton
+            className={`${dir == PageDirection.Next ? 'lg:hidden' : ''} ml-5 lg:fixed inline-block inset-y-1/2 right-4`}
+            onClick={() => {
+              setSpreadNumber(p => p + 1);
+              setLoadingPage(PageDirection.Next);
+            }}
+          >
+            <Image src={rightIcon} alt="Next page" />
+          </PageButton>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div>
       <Loader isLoading={isFetching} text="Fetching pages">
@@ -68,17 +97,8 @@ export default function BookReader({ metadata }: BookReaderProps) {
         </div>
         {(pageL || pageR) && (
           <div>
-            {spreadNumber > 0 && (
-              <PageButton
-                className='fixed inset-y-1/2 left-4'
-                onClick={() => {
-                  setSpreadNumber(p => p - 1);
-                  setLoadingPage(PageDirection.Previous);
-                }}
-              >
-                <Image src={leftIcon} alt="Previous page" />
-              </PageButton>
-            )}
+            <PageRow dir={PageDirection.Previous} />
+
             <div className='flex w-full'>
               {pageL && pageLeftURL && (
                 <img
@@ -99,17 +119,8 @@ export default function BookReader({ metadata }: BookReaderProps) {
                 />
               )}
             </div>
-            {hasMorePages && (
-              <PageButton
-                className='fixed inset-y-1/2 right-4'
-                onClick={() => {
-                  setSpreadNumber(p => p + 1);
-                  setLoadingPage(PageDirection.Next);
-                }}
-              >
-                <Image src={rightIcon} alt="Next page" />
-              </PageButton>
-            )}
+
+            <PageRow dir={PageDirection.Next} />
           </div>
         )}
       </Loader>
