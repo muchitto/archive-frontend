@@ -7,7 +7,7 @@ import FacetArea, { useFacetPanelOpenAtom } from '../components/Search/Facet/Fac
 import PageButton from '../components/Common/PageButton';
 import { Facet, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchQuery, SearchResult } from '../inc/Archive/Search';
 import config from '../inc/Config';
-import { useDebounce, useInitialized, useRunOnce } from '../inc/Hooks';
+import { useDebounce, useRunOnce } from '../inc/Hooks';
 import { useQuery } from '@tanstack/react-query';
 
 import refreshCWIcon from '../assets/icons/refresh-cw.svg';
@@ -36,7 +36,6 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
   const [pageChangeDirection, setPageChangeDirection] = useState<PageDirection | null>(null);
   const [searchText, setSearchText] = useState(initialQuery.query.any);
 
-  const initialized = useInitialized(false);
   const debounceSearchText = useDebounce(searchText, config.defaultSearchDebounceTime);
 
   const router = useRouter();
@@ -182,8 +181,9 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
         {(isChangingPage || (page > 1 && haveResults)) && (
           <PageButton
             className="fixed inset-y-1/2 left-4"
-            textTop={!usedPageButtons ? 'Previous' : ''}
-            textBottom={!usedPageButtons ? 'Page' : ''}
+            textTop='Previous'
+            textBottom='Page'
+            showText={!usedPageButtons}
             showLoader={pageChangeDirection == PageDirection.Previous}
             onClick={() => {
               prevPage();
@@ -195,8 +195,9 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
         {(isChangingPage || haveMoreResults) && (
           <PageButton
             className="fixed inset-y-1/2 right-4"
-            textTop={!usedPageButtons ? 'Next' : ''}
-            textBottom={!usedPageButtons ? 'Page' : ''}
+            textTop='Next'
+            textBottom='Page'
+            showText={!usedPageButtons}
             showLoader={pageChangeDirection == PageDirection.Next}
             onClick={() => {
               nextPage();
