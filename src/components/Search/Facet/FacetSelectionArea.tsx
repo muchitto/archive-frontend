@@ -11,6 +11,7 @@ import upIcon from '../../../assets/icons/up.svg';
 import downIcon from '../../../assets/icons/down.svg';
 import checkSquareIcon from '../../../assets/icons/check-square.svg';
 import squareIcon from '../../../assets/icons/square.svg';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 interface FacetSelectionAreaProps {
   facets: Facet[]
@@ -29,31 +30,38 @@ interface FacetSelectionCheckProps {
 }
 
 export function FacetSelectionCheck ({ facet, className, isSelected, onSelection } : FacetSelectionCheckProps) {
+  const [wrapper] = useAutoAnimate<HTMLDivElement>({
+    duration: 100,
+    easing: 'ease-in-out'
+  });
+
   return (
-    <Checkbox.Root
-      checked={isSelected}
-      onCheckedChange={onSelection}
-      className={`flex content-center min-w-fit ${className} hover:underline p-1`}>
-      <Checkbox.Indicator forceMount={true} className="inline-block">
-        <Image
-          src={isSelected ? checkSquareIcon : squareIcon}
-          alt={'Facet checkbox'}
-          width="30"
-          height="30"
-        />
-      </Checkbox.Indicator>
-      <Label.Root className="inline-block mt-1 ml-1 text-lg">
-        {facet.val}
-      </Label.Root>
-    </Checkbox.Root>
+    <div className='inline-block' ref={wrapper}>
+      <Checkbox.Root
+        checked={isSelected}
+        onCheckedChange={onSelection}
+        className={`flex content-center min-w-fit ${className} hover:underline p-1`}>
+        <Checkbox.Indicator forceMount={true} className="inline-block">
+          <Image
+            src={isSelected ? checkSquareIcon : squareIcon}
+            alt={'Facet checkbox'}
+            width="30"
+            height="30"
+          />
+        </Checkbox.Indicator>
+        <Label.Root className="inline-block mt-1 ml-1 text-lg">
+          {facet.val}
+        </Label.Root>
+      </Checkbox.Root>
+    </div>
   );
 }
 
 export default function FacetSelectionArea({ facetGroup, facetsPerPage, selectedFacets, facets, onClose, onSelection }: FacetSelectionAreaProps) {
   const [filterSearchText, setFilterSearchText] = useState('');
   const [page, setPage] = useState(1);
-  const throttledFilterSearchText = useThrottle(filterSearchText, 100);
 
+  const throttledFilterSearchText = useThrottle(filterSearchText, 100);
   const currentFilteredList = useMemo(() => {
     const searchFilteredList = facets.filter(facet => {
       return (facet.val + '').toLowerCase().trim().includes(throttledFilterSearchText.trim().toLowerCase());
@@ -136,7 +144,7 @@ export default function FacetSelectionArea({ facetGroup, facetsPerPage, selected
           </button>
         </div>
       )}
-      <div className="flex flex-wrap mt-5">
+      <div className="flex flex-wrap mt-5" >
         {facets.length == 0 && (
           <div className="text-2xl">
             No filters in this category with this query
