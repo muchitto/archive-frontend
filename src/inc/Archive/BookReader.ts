@@ -1,3 +1,4 @@
+import createCacheStore from '../Cache';
 import { File, FileFormat, getItemMetadata, Metadata } from './Metadata';
 
 export interface BookReaderPageData {
@@ -160,21 +161,26 @@ export async function getBookReaderBookData (info: BookReaderBookInfo) {
   return result.data as BookReaderData;
 }
 
+const bookReaderCache = createCacheStore<BookReaderTotalData>();
+
 export async function getAllBookReaderDataWithIdentifier(identifier: string) {
+  const bookreaderData = await bookReaderCache.getSet(`bookreader_all_${identifier}`, async () => {
+    const metadata = await getItemMetadata(identifier);
 
-  const metadata = await getItemMetadata(identifier);
+    if(!metadata) {
+      return null;
+    }
 
-  if(!metadata) {
-    return null;
-  }
+    const allBookReaderData = await getAllBookReaderData(metadata);
 
-  const allBookReaderData = await getAllBookReaderData(metadata);
+    if(!allBookReaderData) {
+      return null;
+    }
 
-  if(!allBookReaderData) {
-    return null;
-  }
+    return allBookReaderData;
+  });
 
-  return allBookReaderData;
+  return bookreaderData.data;
 }
 
 export async function getAllBookReaderData(metadata: Metadata) : Promise<BookReaderTotalData | null> {

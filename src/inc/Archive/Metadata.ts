@@ -1,3 +1,4 @@
+import createCacheStore from '../Cache';
 import { MediaType } from './Archive';
 
 export enum FileFormat {
@@ -66,18 +67,24 @@ export interface Metadata {
   workable_servers: string[]
 }
 
+const metadataCache = createCacheStore<Metadata>();
+
 export async function getItemMetadata(identifier: string): Promise<Metadata | null> {
-  const request = await fetch(`https://archive.org/metadata/${identifier}`);
+  const cacheData = await metadataCache.getSet(`metadata_${identifier}`, async (key: string) => {
+    const request = await fetch(`https://archive.org/metadata/${identifier}`);
 
-  if (!request) {
-    return null;
-  }
+    if (!request) {
+      return null;
+    }
 
-  const data = await request.json();
+    const data = await request.json();
 
-  if(!data) {
-    return null;
-  }
+    if(!data) {
+      return null;
+    }
 
-  return data as Metadata;
+    return data as Metadata;
+  });
+
+  return cacheData.data;
 }

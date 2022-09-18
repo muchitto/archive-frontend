@@ -2,6 +2,7 @@ import Redis from 'ioredis';
 
 export type GetFunc<T> = (key: string) => Promise<CacheItem<T>>;
 export type SetFunc<T> = (key: string, data: T, expire: number) => Promise<CacheItem<T>>;
+export type GetSetFunc<T> = (key: string, callback: (key: string) => Promise<T | null>) => Promise<CacheItem<T>>;
 
 export interface CacheItem<T> {
   isValid: boolean
@@ -12,6 +13,7 @@ export interface CacheItem<T> {
 export interface Cache<T> {
   set: SetFunc<T>
   get:  GetFunc<T>
+  getSet: GetSetFunc<T>
 }
 
 export interface CacheStoreConfig {
@@ -85,6 +87,18 @@ export default function createCacheStore <T>(config = defaultCacheConfig) : Cach
 
   return {
     get: getItem,
-    set: setItem
+    set: setItem,
+    getSet: async (key, callback) => {
+      const cacheData = await getItem(key);
+      if(!cacheData.isValid) {
+        const data = await callback(key);
+
+        if(data) {
+          await cacheData.set(data);
+        }
+      }
+
+      return cacheData;
+    }
   };
 }

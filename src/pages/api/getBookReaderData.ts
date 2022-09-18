@@ -1,8 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { BookReaderTotalData, getAllBookReaderDataWithIdentifier } from '../../inc/Archive/BookReader';
-import createCacheStore from '../../inc/Cache';
-
-const cacheStore = createCacheStore<BookReaderTotalData>();
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,18 +9,11 @@ export default async function handler(
 
   const identifier = req.query.identifier as string;
 
-  const cache = await cacheStore.get(`book_reader_data_all_${identifier}`);
+  const results = await getAllBookReaderDataWithIdentifier(identifier);
 
-  let results = cache.data;
-  if(!cache.isValid) {
-    results = await getAllBookReaderDataWithIdentifier(identifier);
-
-    if(!results) {
-      res.status(502).json(null);
-      return;
-    }
-
-    await cache.set(results);
+  if(!results) {
+    res.status(502).json(null);
+    return;
   }
 
   res.status(200).json(results);
