@@ -13,7 +13,9 @@ export default function ViewPlayer ({ metadata }: { metadata: Metadata }) {
 
   if(mediatype == MediaType.Texts) {
     return (
-      <BookReader metadata={metadata} />
+      <>
+        <BookReader metadata={metadata} />
+      </>
     );
   }
 

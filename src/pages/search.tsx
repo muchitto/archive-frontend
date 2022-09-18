@@ -1,14 +1,30 @@
-import { useAtom } from 'jotai';
-import { GetServerSideProps, NextPage } from 'next';
+import {
+  useAtom
+} from 'jotai';
+import {
+  GetServerSideProps, NextPage
+} from 'next';
 import Image from 'next/future/image';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import FacetArea, { useFacetPanelOpenAtom } from '../components/Search/Facet/FacetArea';
+import {
+  useRouter
+} from 'next/router';
+import {
+  useEffect, useState
+} from 'react';
+import FacetArea, {
+  useFacetPanelOpenAtom
+} from '../components/Search/Facet/FacetArea';
 import PageButton from '../components/Common/PageButton';
-import { Facet, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchQuery, SearchResult } from '../inc/Archive/Search';
+import {
+  Facet, FacetGroupSelections, facetTypeList, fetchDataWithQuery, SearchQuery, SearchResult
+} from '../inc/Archive/Search';
 import config from '../inc/Config';
-import { useDebounce, useRunOnce } from '../inc/Hooks';
-import { useQuery } from '@tanstack/react-query';
+import {
+  useDebounce, useRunOnce
+} from '../inc/Hooks';
+import {
+  useQuery
+} from '@tanstack/react-query';
 
 import refreshCWIcon from '../assets/icons/refresh-cw.svg';
 import leftIcon from '../assets/icons/left.svg';
@@ -27,14 +43,14 @@ export enum PageDirection {
   Next
 }
 
-const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchProps) => {
-  const [page, setPage] = useState(initialQuery.page);
-  const [rows, setRows] = useState(initialQuery.rows);
-  const [isFacetPanelOpen, setIsFacetPanelOpen] = useAtom(useFacetPanelOpenAtom);
-  const [usedPageButtons, setUsedPageButtons] = useState(false);
-  const [facetSelections, setFacetSelections] = useState(initialQuery.query.facets || {});
-  const [pageChangeDirection, setPageChangeDirection] = useState<PageDirection | null>(null);
-  const [searchText, setSearchText] = useState(initialQuery.query.any);
+const Search: NextPage<SearchProps> = ({ initialQuery, initialResults }: SearchProps) => {
+  const [ page, setPage ] = useState(initialQuery.page);
+  const [ rows, setRows ] = useState(initialQuery.rows);
+  const [ isFacetPanelOpen, setIsFacetPanelOpen ] = useAtom(useFacetPanelOpenAtom);
+  const [ usedPageButtons, setUsedPageButtons ] = useState(false);
+  const [ facetSelections, setFacetSelections ] = useState(initialQuery.query.facets || {});
+  const [ pageChangeDirection, setPageChangeDirection ] = useState<PageDirection | null>(null);
+  const [ searchText, setSearchText ] = useState(initialQuery.query.any);
 
   const debounceSearchText = useDebounce(searchText, config.defaultSearchDebounceTime);
 
@@ -47,7 +63,7 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
     });
   });
 
-  const { isFetching, data } = useQuery(['runSearch', page, rows, debounceSearchText, facetSelections], () => {
+  const { isFetching, data } = useQuery([ 'runSearch', page, rows, debounceSearchText, facetSelections ], () => {
     if(!debounceSearchText) {
       return null;
     }
@@ -102,13 +118,13 @@ const Search: NextPage<SearchProps> = ({initialQuery, initialResults}: SearchPro
 
   useEffect(() => {
     updateUrl();
-  }, [data]);
+  }, [ data ]);
 
   useEffect(() => {
     if(!isFetching && pageChangeDirection != null) {
       setPageChangeDirection(null);
     }
-  }, [isFetching, pageChangeDirection]);
+  }, [ isFetching, pageChangeDirection ]);
 
   let currentStatusText = '';
   if(!isFetching) {
@@ -225,7 +241,7 @@ export const getServerSideProps : GetServerSideProps<SearchProps> = async (conte
       let value = context.query[queryName] as string[];
 
       if(!Array.isArray(value)) {
-        value = [value as string];
+        value = [ value as string ];
       }
 
       if(!newSelectedFacets[facetGroupIdName]) {

@@ -10,7 +10,7 @@ interface ViewProps {
 }
 
 const View: NextPage<ViewProps> = ({ identifier }: ViewProps) => {
-  const { isFetching, data: metadata } = useQuery(['metadata', identifier], () => (
+  const { isFetching, data: metadata } = useQuery([ 'metadata', identifier ], () => (
     fetch(`/api/getMetadata?identifier=${identifier}`)
       .then(async data => await data.json() as Metadata | null)
   ));

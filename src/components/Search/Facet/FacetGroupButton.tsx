@@ -14,7 +14,9 @@ interface FacetGroupButtonProps {
   onToggle: (isOpen: boolean) => void
 }
 
-export default function FacetGroupButton({ facetGroup, className, totalFacetCount, selectedFacetCount, isError, isLoading, isOpened, onToggle }: FacetGroupButtonProps) {
+export default function FacetGroupButton({
+  facetGroup, className, totalFacetCount, selectedFacetCount, isError, isLoading, isOpened, onToggle
+}: FacetGroupButtonProps) {
   const classes = [
     'font-serif italic text-lg',
     'flex items-center',

@@ -8,7 +8,7 @@ interface LoaderProps {
   isLoading: boolean
 }
 
-export default function Loader ({text, isLoading, children} : PropsWithChildren<LoaderProps>) {
+export default function Loader ({ text, isLoading, children } : PropsWithChildren<LoaderProps>) {
   return (
     <>
       {isLoading && (<div>
