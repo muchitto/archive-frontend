@@ -16,9 +16,9 @@ interface BookReaderProps {
 }
 
 export default function BookReader({ metadata }: BookReaderProps) {
-  const [currentSpread, setCurrentSpread] = useState(null as BookReaderBookSpread | null);
-  const [spreadNumber, setSpreadNumber] = useState(0);
-  const [loadingPage, setLoadingPage] = useState(null as PageDirection | null);
+  const [ currentSpread, setCurrentSpread ] = useState(null as BookReaderBookSpread | null);
+  const [ spreadNumber, setSpreadNumber ] = useState(0);
+  const [ loadingPage, setLoadingPage ] = useState(null as PageDirection | null);
 
   const identifier = metadata.metadata.identifier;
 
@@ -31,7 +31,7 @@ export default function BookReader({ metadata }: BookReaderProps) {
     }
   }, []);
 
-  const { isFetching, data : bookReaderData } = useQuery(['bookReaderData', identifier], async () =>
+  const { isFetching, data : bookReaderData } = useQuery([ 'bookReaderData', identifier ], async () =>
     fetch(`/api/getBookReaderData?identifier=${identifier}`)
       .then(res => res.json())
       .then(data => data as BookReaderTotalData | null)
@@ -50,7 +50,7 @@ export default function BookReader({ metadata }: BookReaderProps) {
     if(bookReaderData?.data.brOptions.data) {
       setCurrentSpread(bookReaderData?.data.brOptions.data[spreadNumber]);
     }
-  }, [spreadNumber]);
+  }, [ spreadNumber ]);
 
   const spreads = (bookReaderData) ? bookReaderData.data.brOptions.data : [];
   const totalSpreads = spreads.length;
@@ -60,7 +60,7 @@ export default function BookReader({ metadata }: BookReaderProps) {
   const pageLeftURL = (currentSpread) ? currentSpread[0].uri : null;
   const pageRightURL = (currentSpread && currentSpread.length > 1) ? currentSpread[1]?.uri : null;
 
-  const PageRow = ({dir} : {dir: PageDirection}) => {
+  const PageRow = ({ dir } : {dir: PageDirection}) => {
     return (
       <div className='flex justify-center'>
         {spreadNumber > 0 && (

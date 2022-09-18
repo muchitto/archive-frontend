@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useDebounce<T>(value: T, delay: number): T {
   // State and setters for debounced value
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const [ debouncedValue, setDebouncedValue ] = useState<T>(value);
   useEffect(
     () => {
       // Update debounced value after delay
@@ -18,14 +18,14 @@ export function useDebounce<T>(value: T, delay: number): T {
         clearTimeout(handler);
       };
     },
-    [value, delay] // Only re-call effect if value or delay changes
+    [ value, delay ] // Only re-call effect if value or delay changes
   );
   return debouncedValue;
 }
 
 export function useThrottle<T>(value: T, delay: number) {
-  const [throttleValue, setThrottleValue] = useState(value);
-  const [shouldWait, setShouldWait] = useState(false);
+  const [ throttleValue, setThrottleValue ] = useState(value);
+  const [ shouldWait, setShouldWait ] = useState(false);
 
   useEffect(() => {
     if(shouldWait) {
@@ -39,7 +39,7 @@ export function useThrottle<T>(value: T, delay: number) {
     setTimeout(() => {
       setShouldWait(false);
     }, delay);
-  }, [value, delay, shouldWait]);
+  }, [ value, delay, shouldWait ]);
 
   return throttleValue;
 }
@@ -59,7 +59,7 @@ export const useRunOnce = (func: () => void, areTruthy: unknown[] = []) => {
       func();
       init.current = true;
     }
-  }, [func, init, canSet]);
+  }, [ func, init, canSet ]);
 };
 
 export const useInitialized = (initialValue: boolean, areTruthy : unknown[] = []) => {
@@ -74,11 +74,11 @@ export const useInitialized = (initialValue: boolean, areTruthy : unknown[] = []
 
 export const useToggle = (initialState = false) => {
   // Initialize the state
-  const [state, setState] = useState(initialState);
+  const [ state, setState ] = useState(initialState);
 
   // Define and memorize toggler function in case we pass down the component,
   // This function change the boolean value to it's opposite value
   const toggle = useCallback(() => setState(state => !state), []);
 
-  return [state, toggle];
+  return [ state, toggle ];
 };

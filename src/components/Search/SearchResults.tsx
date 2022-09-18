@@ -7,7 +7,7 @@ interface SearchResultsProps {
   result: SearchResult
 }
 
-export default function SearchResults({ result, page, rows}: SearchResultsProps) {
+export default function SearchResults({ result, page, rows }: SearchResultsProps) {
   const numResults = result.response.numFound;
   const allPages = Math.ceil(numResults / rows);
 

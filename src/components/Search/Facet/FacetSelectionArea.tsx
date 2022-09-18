@@ -29,8 +29,10 @@ interface FacetSelectionCheckProps {
   onSelection: (isChecked: boolean) => void
 }
 
-export function FacetSelectionCheck ({ facet, className, isSelected, onSelection } : FacetSelectionCheckProps) {
-  const [wrapper] = useAutoAnimate<HTMLDivElement>({
+export function FacetSelectionCheck ({
+  facet, className, isSelected, onSelection
+} : FacetSelectionCheckProps) {
+  const [ wrapper ] = useAutoAnimate<HTMLDivElement>({
     duration: 100,
     easing: 'ease-in-out'
   });
@@ -57,9 +59,11 @@ export function FacetSelectionCheck ({ facet, className, isSelected, onSelection
   );
 }
 
-export default function FacetSelectionArea({ facetGroup, facetsPerPage, selectedFacets, facets, onClose, onSelection }: FacetSelectionAreaProps) {
-  const [filterSearchText, setFilterSearchText] = useState('');
-  const [page, setPage] = useState(1);
+export default function FacetSelectionArea({
+  facetGroup, facetsPerPage, selectedFacets, facets, onClose, onSelection
+}: FacetSelectionAreaProps) {
+  const [ filterSearchText, setFilterSearchText ] = useState('');
+  const [ page, setPage ] = useState(1);
 
   const throttledFilterSearchText = useThrottle(filterSearchText, 100);
   const currentFilteredList = useMemo(() => {
@@ -68,7 +72,7 @@ export default function FacetSelectionArea({ facetGroup, facetsPerPage, selected
     });
 
     return searchFilteredList.slice((page - 1) * facetsPerPage, page * facetsPerPage);
-  }, [facets, throttledFilterSearchText, page, facetsPerPage]);
+  }, [ facets, throttledFilterSearchText, page, facetsPerPage ]);
 
   const totalPages = facets.length / facetsPerPage;
 
@@ -167,7 +171,7 @@ export default function FacetSelectionArea({ facetGroup, facetsPerPage, selected
               facet={facet}
               isSelected={false}
               onSelection={(isChecked) => {
-                const newFacetSelection = [...selectedFacets];
+                const newFacetSelection = [ ...selectedFacets ];
                 newFacetSelection.push(facet);
                 onSelection(facetGroup, newFacetSelection);
               }}

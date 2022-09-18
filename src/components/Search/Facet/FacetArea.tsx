@@ -17,16 +17,18 @@ interface FacetAreaProps {
 
 export const useFacetPanelOpenAtom = atom(false);
 
-export default function FacetArea({ facetsPerPage, searchText, selectedFacets, onSelection, onOpen }: FacetAreaProps) {
-  const [currentFacetGroup, setCurrentFacetGroup] = useState(null as FacetGroup | null);
-  const [openPanel, setOpenPanel] = useAtom(useFacetPanelOpenAtom);
+export default function FacetArea({
+  facetsPerPage, searchText, selectedFacets, onSelection, onOpen
+}: FacetAreaProps) {
+  const [ currentFacetGroup, setCurrentFacetGroup ] = useState(null as FacetGroup | null);
+  const [ openPanel, setOpenPanel ] = useAtom(useFacetPanelOpenAtom);
 
   const facetResults = useQueries({
     queries: Object.keys(facetTypeList).map(groupIdName => {
       const facetGroup = facetTypeList[groupIdName];
 
       return {
-        queryKey: ['facetGroup', facetGroup.idName, searchText],
+        queryKey: [ 'facetGroup', facetGroup.idName, searchText ],
         queryFn: () => {
           return fetch(`/api/getFacets?any=${searchText}&facet=${facetGroup.idName}`)
             .then(res => res.json())
@@ -51,7 +53,7 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, o
       newFacetList[result.data.facetGroup.idName] = result.data.res.facets;
     });
     return newFacetList;
-  }, [facetResults]);
+  }, [ facetResults ]);
 
   const selectedFacetsFiltered = useMemo(() => {
     const out : FacetGroupSelections = {};
@@ -67,17 +69,17 @@ export default function FacetArea({ facetsPerPage, searchText, selectedFacets, o
     }
 
     return out;
-  }, [facetLists, selectedFacets]);
+  }, [ facetLists, selectedFacets ]);
 
   useEffect(() => {
     setCurrentFacetGroup(null);
-  }, [searchText]);
+  }, [ searchText ]);
 
   useEffect(() => {
     if(!openPanel) {
       setCurrentFacetGroup(null);
     }
-  }, [openPanel]);
+  }, [ openPanel ]);
 
   return (
     <>

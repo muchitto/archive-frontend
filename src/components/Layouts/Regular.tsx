@@ -7,7 +7,7 @@ interface LayoutProps {
   title?: string
 }
 
-export default function RegulerLayout ({children, title} : PropsWithChildren<LayoutProps>) {
+export default function RegulerLayout ({ children, title } : PropsWithChildren<LayoutProps>) {
   const siteName = 'Archive';
 
   const titleText = `${siteName}${title ? ` - ${title}` : ''}`;

@@ -20,7 +20,6 @@ export const getServerSideProps : GetServerSideProps<HomeProps> = async (context
       destination: '/search',
       statusCode: 307
     },
-    props: {
-    }
+    props: {}
   };
 };

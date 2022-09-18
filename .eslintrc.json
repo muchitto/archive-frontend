@@ -16,16 +16,36 @@
     "semi": "off",
     "no-unused-vars": "off",
     "indent": ["error", 2],
-    "@typescript-eslint/semi": ["error", "always"],
     "quotes": ["error", "single"],
+    "object-curly-spacing": ["error", "always"],
+    "object-property-newline": ["error"],
+    "object-curly-newline": ["error",  {
+      "ObjectExpression": {
+        "multiline": true,
+        "minProperties": 1
+      },
+      "ObjectPattern": {
+        "multiline": true,
+        "minProperties": 4
+      }
+    }],
+    "array-bracket-newline": ["error", {
+      "minItems": 6,
+      "multiline": true
+    }],
+    "array-element-newline": ["error", {
+      "minItems": 6
+    }],
+    "array-bracket-spacing": ["error", "always"],
+    "no-unexpected-multiline": "error",
+    "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+    "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     "@typescript-eslint/member-delimiter-style": ["error", {
       "multiline": {
         "delimiter": "none"
       }
     }],
-    "@typescript-eslint/no-empty-interface": "warn",
-    "no-unexpected-multiline": "error",
-    "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
-    "react-hooks/exhaustive-deps": "warn" // Checks effect dependencies
+    "@typescript-eslint/semi": ["error", "always"],
+    "@typescript-eslint/no-empty-interface": "warn"
   }
 }
