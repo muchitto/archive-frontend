@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { CategoryQuery, FacetSearchResultPretty, fetchFacetsPretty } from '../../inc/Archive/Search';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse< FacetSearchResultPretty | null>
-) {
+export default async function handler( req: NextApiRequest, res: NextApiResponse< FacetSearchResultPretty | null>) {
   const facet = req.query.facet as string;
   const any = req.query.any as string;
 

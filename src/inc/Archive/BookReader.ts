@@ -1,4 +1,3 @@
-import createCacheStore from '../Cache';
 import { File, FileFormat, getItemMetadata, Metadata } from './Metadata';
 
 export interface BookReaderPageData {
@@ -15,7 +14,7 @@ export enum BookType {
   ePub = 'ePub',
   PlainText = 'Plain Text',
   Daisy = 'DAISY',
-  Kindle = 'Kindle'
+  Kindle = 'Kindle',
 }
 
 export type BookReaderBookSpread = [BookReaderPageData, BookReaderPageData?];
@@ -116,28 +115,32 @@ export interface BookReaderTotalData {
   data: BookReaderData
 }
 
-export async function getBookReaderBookInfo(metadata: Metadata) : Promise<BookReaderBookInfo | null> {
-  const url = new URL(`https://${metadata.server}/BookReader/BookReaderJSON.php`);
+export async function getBookReaderBookInfo(
+  metadata: Metadata
+): Promise<BookReaderBookInfo | null> {
+  const url = new URL(
+    `https://${metadata.server}/BookReader/BookReaderJSON.php`
+  );
   url.searchParams.set('itemId', metadata.metadata.identifier);
   url.searchParams.set('itemPath', metadata.dir);
   url.searchParams.set('server', metadata.server);
 
   const request = await fetch(url.toString());
 
-  if(request.status != 200) {
+  if (request.status != 200) {
     return null;
   }
 
-  const result = await request.json() as BookReaderBookInfo;
+  const result = (await request.json()) as BookReaderBookInfo;
 
-  if(!result) {
+  if (!result) {
     return null;
   }
 
   return result;
 }
 
-export async function getBookReaderBookData (info: BookReaderBookInfo) {
+export async function getBookReaderBookData(info: BookReaderBookInfo) {
   const url = new URL(`https://${info.server}/BookReader/BookReaderJSIA.php`);
   url.searchParams.set('id', info.itemId);
   url.searchParams.set('itemPath', info.itemPath);
@@ -148,64 +151,63 @@ export async function getBookReaderBookData (info: BookReaderBookInfo) {
 
   const request = await fetch(url.toString());
 
-  if(request.status != 200) {
+  if (request.status != 200) {
     return null;
   }
 
   const result = await request.json();
 
-  if(!result) {
+  if (!result) {
     return null;
   }
 
   return result.data as BookReaderData;
 }
 
-const bookReaderCache = createCacheStore<BookReaderTotalData>();
-
 export async function getAllBookReaderDataWithIdentifier(identifier: string) {
-  const bookreaderData = await bookReaderCache.getSet(`bookreader_all_${identifier}`, async () => {
-    const metadata = await getItemMetadata(identifier);
+  const metadata = await getItemMetadata(identifier);
 
-    if(!metadata) {
-      return null;
-    }
+  if (!metadata) {
+    return null;
+  }
 
-    const allBookReaderData = await getAllBookReaderData(metadata);
+  const allBookReaderData = await getAllBookReaderData(metadata);
 
-    if(!allBookReaderData) {
-      return null;
-    }
+  if (!allBookReaderData) {
+    return null;
+  }
 
-    return allBookReaderData;
-  });
-
-  return bookreaderData.data;
+  return allBookReaderData;
 }
 
-export async function getAllBookReaderData(metadata: Metadata) : Promise<BookReaderTotalData | null> {
+export async function getAllBookReaderData(
+  metadata: Metadata
+): Promise<BookReaderTotalData | null> {
   const info = await getBookReaderBookInfo(metadata);
 
-  if(!info) {
+  if (!info) {
     return null;
   }
 
   const data = await getBookReaderBookData(info);
 
-  if(!data) {
+  if (!data) {
     return null;
   }
 
   return {
     data,
-    info
+    info,
   };
 }
 
-export function getItemMetadataWithFormat(metadata: Metadata, format: FileFormat) : File | null {
-  const file = metadata.files.find(file => file.format == format);
+export function getItemMetadataWithFormat(
+  metadata: Metadata,
+  format: FileFormat
+): File | null {
+  const file = metadata.files.find((file) => file.format == format);
 
-  if(!file) {
+  if (!file) {
     return null;
   }
 

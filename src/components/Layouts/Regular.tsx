@@ -16,7 +16,7 @@ export default function RegulerLayout ({ children, title } : PropsWithChildren<L
       <Head>
         <title>{titleText}</title>
       </Head>
-      <div className="container mx-auto max-w-ld rounded-md p-5">
+      <div className="container mx-auto max-w-7xl rounded-md p-5">
         <Header />
         {children}
         <Footer />
