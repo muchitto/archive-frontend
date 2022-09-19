@@ -1,6 +1,6 @@
 import Image from 'next/future/image';
 import { useEffect, useState } from 'react';
-import { Metadata } from '../../../inc/Archive/Metadata';
+import { File, Metadata } from '../../../inc/Archive/Metadata';
 import PageButton from '../../Common/PageButton';
 
 import leftIcon from '../../../assets/icons/left.svg';
@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookReaderBookSpread, BookReaderTotalData } from '../../../inc/Archive/BookReader';
 import Loader from '../../Common/Loader';
 import { PageDirection } from '../../../pages/search';
+import BookFileList from './BookFileList';
 
 interface BookReaderProps {
   metadata: Metadata
@@ -19,6 +20,7 @@ export default function BookReader({ metadata }: BookReaderProps) {
   const [ currentSpread, setCurrentSpread ] = useState(null as BookReaderBookSpread | null);
   const [ spreadNumber, setSpreadNumber ] = useState(0);
   const [ loadingPage, setLoadingPage ] = useState(null as PageDirection | null);
+  const [ currentFile, setCurrentFile ] = useState(null as File | null);
 
   const identifier = metadata.metadata.identifier;
 
@@ -36,6 +38,7 @@ export default function BookReader({ metadata }: BookReaderProps) {
       .then(res => res.json())
       .then(data => data as BookReaderTotalData | null)
       .then(data => {
+        console.log(data);
         if(data?.data.brOptions.data && data?.data.brOptions.data.length > 0) {
           setCurrentSpread(data.data.brOptions.data[0]);
         }
@@ -92,37 +95,46 @@ export default function BookReader({ metadata }: BookReaderProps) {
   return (
     <div>
       <Loader isLoading={isFetching} text="Fetching pages">
-        <div className="text-center text-xl font-bold pb-4">
-        Page: {spreadNumber + 1} / {totalSpreads}
-        </div>
-        {(pageL || pageR) && (
-          <div>
-            <PageRow dir={PageDirection.Previous} />
-
-            <div className='flex w-full'>
-              {pageL && pageLeftURL && (
-                <img
-                  src={pageLeftURL}
-                  width={pageL.width}
-                  height={pageL.height}
-                  alt={'Page'}
-                  className="w-1/2"
-                />
-              )}
-              {pageR && pageRightURL && (
-                <img
-                  src={pageRightURL}
-                  width={pageR.width}
-                  height={pageR.height}
-                  alt={'Page'}
-                  className="w-1/2"
-                />
-              )}
-            </div>
-
-            <PageRow dir={PageDirection.Next} />
+        <div className="flex">
+          <div className="flex-1 overflow-y-scroll">
+            <BookFileList metadata={metadata} onSelect={file => {
+              setCurrentFile(file);
+            }} />
           </div>
-        )}
+          <div className="flex-0">
+            <div className="text-center text-xl font-bold pb-4">
+            Page: {spreadNumber + 1} / {totalSpreads}
+            </div>
+            {(pageL || pageR) && (
+              <div>
+                <PageRow dir={PageDirection.Previous} />
+
+                <div className='flex w-full'>
+                  {pageL && pageLeftURL && (
+                    <img
+                      src={pageLeftURL}
+                      width={pageL.width}
+                      height={pageL.height}
+                      alt={'Page'}
+                      className="w-1/2"
+                    />
+                  )}
+                  {pageR && pageRightURL && (
+                    <img
+                      src={pageRightURL}
+                      width={pageR.width}
+                      height={pageR.height}
+                      alt={'Page'}
+                      className="w-1/2"
+                    />
+                  )}
+                </div>
+
+                <PageRow dir={PageDirection.Next} />
+              </div>
+            )}
+          </div>
+        </div>
       </Loader>
     </div>
   );

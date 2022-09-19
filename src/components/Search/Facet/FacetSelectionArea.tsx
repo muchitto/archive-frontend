@@ -2,8 +2,6 @@ import Image from 'next/future/image';
 import { useMemo, useState } from 'react';
 import { Facet, FacetGroup } from '../../../inc/Archive/Search';
 import { useThrottle } from '../../../inc/Hooks';
-import * as Checkbox from '@radix-ui/react-checkbox';
-import * as Label from '@radix-ui/react-label';
 
 import searchIcon from '../../../assets/icons/search.svg';
 import xIcon from '../../../assets/icons/x.svg';
@@ -32,30 +30,35 @@ interface FacetSelectionCheckProps {
 export function FacetSelectionCheck ({
   facet, className, isSelected, onSelection
 } : FacetSelectionCheckProps) {
-  const [ wrapper ] = useAutoAnimate<HTMLDivElement>({
+  const [ wrapper ] = useAutoAnimate<HTMLButtonElement>({
     duration: 100,
     easing: 'ease-in-out'
   });
 
+  const facetName = (facet.val + '');
+
   return (
-    <div className='inline-block' ref={wrapper}>
-      <Checkbox.Root
-        checked={isSelected}
-        onCheckedChange={onSelection}
-        className={`flex content-center min-w-fit ${className} hover:underline p-1`}>
-        <Checkbox.Indicator forceMount={true} className="inline-block">
-          <Image
-            src={isSelected ? checkSquareIcon : squareIcon}
-            alt={'Facet checkbox'}
-            width="30"
-            height="30"
-          />
-        </Checkbox.Indicator>
-        <Label.Root className="inline-block mt-1 ml-1 text-lg">
-          {facet.val}
-        </Label.Root>
-      </Checkbox.Root>
-    </div>
+    <button
+      ref={wrapper}
+      className={`flex content-center items-center min-w-fit ${className} hover:underline p-1`}
+      title={(isSelected) ? `Do not filter with ${facetName}` : `Filter with ${facetName}`}
+      onClick={() => {
+        onSelection(!isSelected);
+      }}
+    >
+      <Image
+        src={isSelected ? checkSquareIcon : squareIcon}
+        alt={'Facet checkbox'}
+        width="30"
+        height="30"
+        className="w-8 h-8"
+      />
+      <label className="inline-block mt-1 ml-1 text-lg text-left pl-2" style={{
+        'wordBreak': 'break-word'
+      }}>
+        {(facetName.length >= 100) ? facetName.slice(0, 100) + '...' : facetName}
+      </label>
+    </button>
   );
 }
 
@@ -148,7 +151,7 @@ export default function FacetSelectionArea({
           </button>
         </div>
       )}
-      <div className="flex flex-wrap mt-5" >
+      <div className="grid grid-flow-row grid-cols-4 mt-5" >
         {facets.length == 0 && (
           <div className="text-2xl">
             No filters in this category with this query
